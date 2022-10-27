@@ -1,0 +1,24 @@
+namespace: shipping
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: batch/v1beta1
+    kind: CronJob
+    metadata:
+      name: marketplace-middleware-cli
+      namespace: marketplace-middleware-cli
+    spec:
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              containers:
+                - name: marketplace-middleware-cli-job
+                  image: luuna/marketplace-middleware-cli:develop-55bbcbf546763c8e125ea164080c3a8446aff510

@@ -1,0 +1,21 @@
+namespace: zefin
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: zefin-loan-origination-system
+      namespace: zefin
+    spec:
+      template:
+        spec:
+          containers:
+          - name: zefin-loan-origination-system
+            image: luuna/zefin-loan-origination-system:staging-1c6c056dbacf2ef8fff8e57e16fdd25900059739

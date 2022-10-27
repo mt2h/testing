@@ -1,0 +1,85 @@
+resources:
+  - ../../base
+  - ingress.yaml
+
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+configMapGenerator:
+- name: ms-catalog-zecore
+  literals:
+  - NODE_ENV=development
+  - PORT="3000"
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ms-catalog-zecore
+      namespace: client
+    spec:
+      template:
+        spec:
+          containers:
+            - name: ms-catalog-zecore
+              image: luuna/ms-catalog-zecore:zecore-develop-197252805bf56fa9b81d950860cd73d5bb6036c0
+              envFrom:
+                - configMapRef:
+                    name: ms-catalog-zecore
+                - secretRef:
+                    name: ms-catalog-zecore
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ms-catalog-zecore-celery
+      namespace: client
+    spec:
+      template:
+        spec:
+          containers:
+            - name: celery-worker
+              image: luuna/ms-catalog-zecore:zecore-develop-197252805bf56fa9b81d950860cd73d5bb6036c0
+              imagePullPolicy: Always
+              envFrom:
+              - secretRef:
+                  name: ms-catalog-zecore
+
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: ms-catalog-zecore
+      namespace: client
+    spec:
+      minReplicas: 1
+      maxReplicas: 2
+
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: ms-catalog-zecore-celery
+      namespace: client
+    spec:
+      minReplicas: 1
+      maxReplicas: 2
+
+  - |-
+    apiVersion: batch/v1beta1
+    kind: CronJob
+    metadata:
+      name: cronjob-reviews
+      namespace: client
+    spec:
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              containers:
+                - name: cronjob
+                  image: luuna/ms-catalog-zecore:zecore-develop-197252805bf56fa9b81d950860cd73d5bb6036c0

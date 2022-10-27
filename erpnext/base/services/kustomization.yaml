@@ -1,0 +1,6 @@
+resources:
+  - redis-cache-service.yaml
+  - redis-queue-service.yaml
+  - redis-socketio-service.yaml
+  - service.yaml
+  - socketio-service.yaml

@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ms-catalog
+  name: ms-catalog
+  namespace: client-ms-catalog
+  annotations:
+    secret.reloader.stakater.com/reload: "redis-ms-dev,mariadb,algolia,regcred"
+spec:
+  selector:
+    matchLabels:
+      app: ms-catalog
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ms-catalog
+    spec:
+      initContainers:
+        - name: migrate
+          args:
+            - -c
+            - flask db upgrade --directory=/home/python/app/src/migrations
+          command:
+            - /bin/sh
+          envFrom:     
+            - secretRef:
+                name: ms-catalog
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "150m"
+            limits:
+              memory: "500Mi"
+              cpu: "250m"
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsGroup: 10000
+            runAsUser: 10000
+          image: luuna/ms-catalog:latest-develop
+          imagePullPolicy: Always
+      containers:
+        - name: ms-catalog
+          image: luuna/ms-catalog:latest-develop
+          imagePullPolicy: Always
+          envFrom:     
+            - secretRef:
+                name: ms-catalog
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 5000
+              scheme: HTTP
+            failureThreshold: 5
+            successThreshold: 5
+            periodSeconds: 10
+            timeoutSeconds: 30
+          resources:
+            requests:
+              memory: "300Mi"
+              cpu: "150m"
+            limits:
+              memory: "500Mi"
+              cpu: "250m"
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsGroup: 10000
+            runAsUser: 10000
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: backend
+      volumes:
+        - emptyDir: {}
+          name: tmp
+      restartPolicy: Always
+      serviceAccount: ms-catalog
+      serviceAccountName: ms-catalog

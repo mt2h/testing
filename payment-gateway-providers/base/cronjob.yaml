@@ -1,0 +1,40 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: payment-gateway-providers
+  namespace: payments
+spec:
+  schedule: 0 5 * * *
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            cron: payment-gateway-providers-backup
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: payment-gateway-providers-job
+              image: python:3.8.3-alpine
+              envFrom:
+              - secretRef:
+                  name: payment-gateway-providers
+              args:
+                - /bin/sh
+                - -c
+                - |
+                  apk -v --update add --no-cache mariadb-client openssh-client
+                  pip install --upgrade pip
+                  pip install --upgrade awscli==1.14.5 s3cmd==2.0.1 python-magic
+                  rm -f /var/cache/apk/*
+                  cd /tmp/
+                  echo "Backup started for database - ${MS_DB_NAME}"
+                  FILE=`date +%Y%m%d_%H%M%S`_${MS_DB_NAME}.sql
+                  mysqldump -h ${MS_DB_HOST} -u ${MS_DB_USER_NAME} -p ${MS_DB_NAME} -p${MS_DB_PASSWORD} > $FILE
+                  tar -czvf $FILE.tar.gz $FILE
+                  aws s3 cp $FILE.tar.gz $AWS_BUCKET
+                  rm $FILE && rm $FILE.tar.gz
+                  echo "Dump SQL completed"

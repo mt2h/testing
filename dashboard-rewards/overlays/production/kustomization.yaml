@@ -1,0 +1,25 @@
+resources:
+  - ../../base
+  - ingress.yaml
+
+generators:
+  - secret-generator.yaml
+
+namespace: client
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: dashboard-rewards
+      namespace: client-dashboard-rewards
+    spec:
+      template:
+        spec:
+          containers:
+          - name: dashboard-rewards
+            image: luuna/dashboard-rewards:master-4c84e51231eacf7fd9d0c5fa888b4245508fe46a
+            env:
+            - name: REWARDS_URL
+              value: https://rewards.luuna.mx

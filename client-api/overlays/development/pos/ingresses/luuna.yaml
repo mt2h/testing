@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: client-api-pos-luuna
+  namespace: client-api
+spec:
+  rules:
+    - host: pos-api-staging.luuna.mx
+      http:
+        paths:
+          - backend:
+              service:
+                name: client-api-pos-luuna
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific

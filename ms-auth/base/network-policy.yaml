@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ms-auth
+  namespace: client-ms-auth
+spec:
+  podSelector:
+    matchLabels:
+      app: ms-auth
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ms-auth
+      ports:
+        - protocol: TCP
+          port: 5000
+  egress:
+    - ports:
+        - protocol: TCP
+          port: 3306
+        - protocol: TCP
+          port: 16548

@@ -1,0 +1,86 @@
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../../base/pos
+  - ingresses
+
+configMapGenerator:
+  - name: client-api-pos-luuna
+    literals:
+      - DEBUG="False"
+      - BRAND=LUUNA
+      - URL_PAYMENT=http://payments.luuna.mx/order?token=
+  - name: client-api-pos-nooz
+    literals:
+      - DEBUG="False"
+      - BRAND=NOOZ
+      - URL_PAYMENT=http://payments.luuna.mx/order?token=
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: client-api-pos-luuna
+      namespace: client-api
+    spec:
+      template:
+        spec:
+          containers:
+            - name: api
+              image: luuna/client-api:master-18e1c282ec205d81410638f78f776d606c1ee0ae
+              command:
+                - /code/Docker/entrypoint-production.sh
+              envFrom:
+                  - configMapRef:
+                      name: client-api
+                  - configMapRef:
+                      name: client-api-luuna
+                  - secretRef:
+                      name: client-api-pos
+                  - secretRef:
+                      name: client-api-pos-luuna
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: client-api-pos-luuna
+      namespace: client-api
+    spec:
+      minReplicas: 2
+      maxReplicas: 10
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: client-api-pos-nooz
+      namespace: client-api
+    spec:
+      template:
+        spec:
+          containers:
+            - name: api
+              image: luuna/client-api:master-18e1c282ec205d81410638f78f776d606c1ee0ae
+              command:
+                - /code/Docker/entrypoint-production.sh
+              envFrom:
+                - configMapRef:
+                    name: client-api
+                - configMapRef:
+                    name: client-api-nooz
+                - secretRef:
+                    name: client-api-pos
+                - secretRef:
+                    name: client-api-pos-nooz
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: client-api-pos-nooz
+      namespace: client-api
+    spec:
+      minReplicas: 1
+      maxReplicas: 1

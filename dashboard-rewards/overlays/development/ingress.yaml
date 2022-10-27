@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: dashboard-rewards
+  namespace: client-dashboard-rewards
+spec:
+  rules:
+    - host: dashboard-rewards-development.luuna.mx
+      http:
+        paths:
+          - backend:
+              service:
+                name: dashboard-rewards
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific

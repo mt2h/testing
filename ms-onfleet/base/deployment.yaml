@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ms-onfleet
+  name: ms-onfleet
+  annotations:
+    configmap.reloader.stakater.com/reload: "ms-onfleet"
+    secret.reloader.stakater.com/reload: "ms-onfleet"
+  namespace: shipping
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-onfleet
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ms-onfleet
+    spec:       
+      initContainers:
+        - name: migrations
+          image: luuna/ms-onfleet:latest
+          imagePullPolicy: Always        
+          envFrom:
+          - configMapRef:
+              name: ms-onfleet
+          - secretRef:
+              name: ms-onfleet
+          command:
+            - /bin/sh 
+          args:
+            - -c
+            - flask db upgrade
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "150m"
+            limits:
+              memory: "500Mi"
+              cpu: "250m"      
+      containers:
+        - name: ms-onfleet
+          image: luuna/ms-onfleet:latest
+          imagePullPolicy: Always
+          envFrom:
+          - configMapRef:
+              name: ms-onfleet         
+          - secretRef:
+              name: ms-onfleet
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: 8000
+              scheme: HTTP
+            failureThreshold: 5
+            successThreshold: 1
+            periodSeconds: 10
+            timeoutSeconds: 7
+          livenessProbe:
+            httpGet:
+              path: /_health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5     
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "150m"
+            limits:
+              memory: "500Mi"
+              cpu: "250m"    
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: backend
+      restartPolicy: Always
+      serviceAccount: ms-onfleet
+      serviceAccountName: ms-onfleet

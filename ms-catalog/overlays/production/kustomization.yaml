@@ -1,0 +1,34 @@
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ms-catalog
+      namespace: client-ms-catalog
+    spec:
+      template:
+        spec:
+          initContainers:
+            - name: migrate
+              image: luuna/ms-catalog:master-80623c52e1e63777dff3d6e0b859e1c497c75ea0
+          containers:
+            - name: ms-catalog
+              image: luuna/ms-catalog:master-80623c52e1e63777dff3d6e0b859e1c497c75ea0
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: ms-catalog
+      namespace: client-ms-catalog
+    spec:
+      minReplicas: 1
+      maxReplicas: 1

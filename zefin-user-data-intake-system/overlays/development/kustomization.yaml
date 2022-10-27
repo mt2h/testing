@@ -1,0 +1,22 @@
+namespace: zefin
+
+#generators:
+#  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: zefin-user-data-intake-system
+      namespace: zefin
+    spec:
+      template:
+        spec:
+          containers:
+          - name: zefin-user-data-intake-system
+            image: luuna/zefin-user-data-intake-system:develop-7ba5b740a97eafacb5582769ba263b6e5131bb4c

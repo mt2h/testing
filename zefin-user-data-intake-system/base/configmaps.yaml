@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zefin-user-data-intake-system
+  namespace: zefin
+data:
+  NODE_ENV: "development"
+

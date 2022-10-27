@@ -1,0 +1,6 @@
+resources:
+  - hpa-erpnext.yaml
+  - hpa-worker-s.yaml
+  - hpa-worker-d.yaml
+  - hpa-worker-l.yaml
+  - hpa-socketio.yaml

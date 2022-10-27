@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: zefin-loan-origination-system
+    service: zefin-loan-origination-system
+  name: zefin-loan-origination-system
+  namespace: zefin
+spec:
+  ports:
+    - port: 80
+      targetPort: 5000
+      protocol: TCP
+  selector:
+    app: zefin-loan-origination-system
+  type: ClusterIP

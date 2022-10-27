@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: zefin-loan-gateway
+  name: zefin-loan-gateway
+  annotations:
+    configmap.reloader.stakater.com/reload: "zefin-loan-gateway"
+    secret.reloader.stakater.com/reload: "zefin-loan-gateway" 
+  namespace: zefin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zefin-loan-gateway
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:   
+      labels:
+        app: zefin-loan-gateway
+    spec:                   
+      containers:
+        - name: zefin-loan-gateway
+          image: luuna/zefin-loan-gateway:latest
+          imagePullPolicy: Always
+          envFrom:
+          - configMapRef:
+              name: zefin-loan-gateway         
+          #- secretRef:
+          #    name: zefin-loan-gateway
+          #readinessProbe:
+          #  httpGet:
+          #    path: /_health
+          #    port: 8000
+          #    scheme: HTTP
+          #  failureThreshold: 5
+          #  successThreshold: 1
+          #  periodSeconds: 10
+          #  timeoutSeconds: 7              
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "150m"
+            limits:
+              memory: "500Mi"
+              cpu: "250m"
+          volumeMounts:
+            - mountPath: /tmp
+              name: app          
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsGroup: 10000
+            runAsUser: 10000
+      volumes:
+      - name: app
+        emptyDir: {}            
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: backend
+      restartPolicy: Always
+      serviceAccount: zefin-loan-gateway
+      serviceAccountName: zefin-loan-gateway

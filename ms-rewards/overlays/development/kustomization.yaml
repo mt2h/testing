@@ -1,0 +1,44 @@
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ms-rewards
+      namespace: client-ms-rewards
+    spec:
+      template:
+        spec:
+          containers:
+          - name: ms-rewards
+            image: luuna/ms-rewards:develop-63b1a868ca729f4199aba332a7a452feaccabb25
+            envFrom:
+            - configMapRef:
+                name: ms-rewards
+            - configMapRef:
+                name: ms-rewards-gen
+            - secretRef:
+                name: ms-rewards
+          initContainers:
+          - name: migrations
+            image: luuna/ms-rewards:develop-63b1a868ca729f4199aba332a7a452feaccabb25
+            envFrom:
+            - configMapRef:
+                name: ms-rewards
+            - configMapRef:
+                name: ms-rewards-gen
+            - secretRef:
+                name: ms-rewards
+
+configMapGenerator:
+- name: ms-rewards-gen
+  literals:
+  - FLASK_ENV=production

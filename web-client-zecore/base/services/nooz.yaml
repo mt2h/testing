@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: web-client-nooz-zecore
+    service: web-client-nooz-zecore
+  name: web-client-nooz-zecore
+  namespace: web-client
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8000
+  selector:
+    app: web-client-nooz-zecore
+  type: ClusterIP
+

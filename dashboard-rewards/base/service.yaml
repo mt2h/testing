@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: dashboard-rewards
+    service: dashboard-rewards
+  name: dashboard-rewards
+  namespace: client-dashboard-rewards
+spec:
+  ports:
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
+  selector:
+    app: dashboard-rewards
+  type: ClusterIP

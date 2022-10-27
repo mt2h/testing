@@ -1,0 +1,35 @@
+---
+apiVersion: v1
+data:
+  django_settings_module: config.settings.develop
+  flask_app: /home/python/app/src/manage.py
+  flask_env: staging
+  flask_max_content_length: "1048576"
+  flask_secret_key: u5XOvz71RgBfKryRYmqMRYlnBVQYXCJn
+  python_debug: "True"
+  python_env_app: client
+  python_env_mode: development
+  wsgi_application: config.wsgi.application
+kind: ConfigMap
+metadata:
+  name: python
+  namespace: client-ms-catalog
+
+---
+apiVersion: v1
+data:
+  url_reviews_ms_catalog: https://api-v2.luuna.mx/staging/ms-reviews
+  url_rewards_client_api: https://rewards-api-stg.luuna.mx/v2.0/rewards/
+kind: ConfigMap
+metadata:
+  name: microservices
+  namespace: client-ms-catalog
+
+---
+apiVersion: v1
+data:
+  config_file_flask_microservice: /home/python/app/src/newrelic.ini
+kind: ConfigMap
+metadata:
+  name: new-relic
+  namespace: client-ms-catalog

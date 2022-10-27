@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ms-reviews
+    service: ms-reviews
+  name: ms-reviews
+  namespace: client-ms-reviews
+spec:
+  ports:
+    - port: 80
+      targetPort: 5000
+      protocol: TCP
+  selector:
+    app: ms-reviews
+  type: ClusterIP

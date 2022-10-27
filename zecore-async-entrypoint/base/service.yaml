@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: zecore-async-entrypoint
+    service: zecore-async-entrypoint
+  name: zecore-async-entrypoint
+  namespace: payments
+spec:
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+  selector:
+    app: zecore-async-entrypoint
+  type: ClusterIP

@@ -1,0 +1,64 @@
+resources:
+  - ../../base
+  - ingresses
+
+namespace: client
+
+configMapGenerator:
+  - name: luuna-sitemap
+    files:
+      - sitemap.xml=luuna.sitemap.xml
+  - name: nooz-sitemap
+    files:
+      - sitemap.xml=nooz.sitemap.xml
+  - name: mappa-sitemap
+    files:
+      - sitemap.xml=mappa.sitemap.xml
+
+generatorOptions:
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: web-client-luuna
+      namespace: web-client
+    spec:
+      template:
+        spec:
+          containers:
+            - name: web-client
+              image: luuna/web-v2-luuna:master-a55a3fa7bf6f9432ec73174ca8535f51594a5f45
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: client-luuna
+      namespace: web-client
+    spec:
+      minReplicas: 1
+      maxReplicas: 1
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: web-client-nooz
+      namespace: web-client
+    spec:
+      template:
+        spec:
+          containers:
+            - name: web-client
+              image: luuna/web-v2-nooz:master-a55a3fa7bf6f9432ec73174ca8535f51594a5f45
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: client-nooz
+      namespace: web-client
+    spec:
+      minReplicas: 1
+      maxReplicas: 1

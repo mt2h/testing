@@ -1,0 +1,10 @@
+generators:
+  - secret-generator.yaml
+
+helmCharts:
+- name: mariadb
+  repo: https://charts.bitnami.com/bitnami
+  version: 10.3.0
+  releaseName: mariadb
+  valuesFile:  values.yaml
+  namespace: payments

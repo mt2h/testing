@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: web-client-luuna-zecore
+    service: web-client-luuna-zecore
+  name: web-client-luuna-zecore
+  namespace: web-client
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8000
+  selector:
+    app: web-client-luuna-zecore
+  type: ClusterIP
+

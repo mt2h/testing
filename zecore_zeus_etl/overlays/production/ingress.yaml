@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: zecore-zeus-etl
+  namespace: zeus
+spec:
+  rules:
+    - host: zecore-zeus-etl.zebrands.mx
+      http:
+        paths:
+          - backend:
+              service:
+                name: zecore-zeus-etl
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific

@@ -1,0 +1,45 @@
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+configMapGenerator:
+- name: ms-rewards-cm
+  literals:
+  - FLASK_ENV=production
+  - FLASK_APP=/home/python/app/src/app.py
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ms-rewards
+      namespace: client-ms-rewards
+    spec:
+      template:
+        spec:
+          containers:
+          - name: ms-rewards
+            image: luuna/ms-rewards:master-621836329beeda205b6f800020146520207a61b3
+            envFrom:
+            - configMapRef:
+                name: ms-rewards
+            - configMapRef:
+                name: ms-rewards-cm
+            - secretRef:
+                name: ms-rewards
+          initContainers:
+          - name: migrations
+            image: luuna/ms-rewards:master-621836329beeda205b6f800020146520207a61b3
+            envFrom:
+            - configMapRef:
+                name: ms-rewards
+            - configMapRef:
+                name: ms-rewards-cm
+            - secretRef:
+                name: ms-rewards

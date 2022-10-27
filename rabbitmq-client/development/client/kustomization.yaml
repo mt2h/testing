@@ -1,0 +1,9 @@
+namespace: client
+
+helmCharts:
+- name: rabbitmq
+  repo: https://charts.bitnami.com/bitnami
+  version: 8.24.13
+  releaseName: rabbitmq
+  valuesFile:  values.yaml
+  namespace: client

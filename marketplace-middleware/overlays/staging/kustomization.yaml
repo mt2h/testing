@@ -1,0 +1,47 @@
+namespace: shipping
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+configMapGenerator:
+- name: marketplace-middleware
+  literals:
+  - DEV_MODE=ON
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: marketplace-middleware
+      namespace: marketplace-middleware
+    spec:
+      template:
+        spec:
+          containers:
+            - name: marketplace-middleware
+              image: luuna/marketplace-middleware:staging-e2dd968df9a3f29b94fe424b8fe4a4b262670bdf
+              envFrom:
+                - configMapRef:
+                    name: marketplace-middleware
+                - secretRef:
+                    name: marketplace-middleware
+  - |-
+    apiVersion: batch/v1beta1
+    kind: CronJob
+    metadata:
+      name: marketplace-middleware
+      namespace: marketplace-middleware
+    spec:
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              containers:
+                - name: marketplace-middleware-job
+                  image: luuna/marketplace-middleware:staging-e2dd968df9a3f29b94fe424b8fe4a4b262670bdf
+      suspend: true

@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ms-rewards
+  name: ms-rewards
+  namespace: client-ms-rewards
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-rewards
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ms-rewards
+    spec:
+      initContainers:
+        - name: migrations
+          image: luuna/ms-rewards:latest
+          imagePullPolicy: Always        
+          envFrom:
+          - configMapRef:
+              name: ms-rewards          
+          - secretRef:
+              name: ms-rewards
+          command: ["/bin/sh"]
+          args: ["-c", "flask db upgrade"]
+      containers:
+        - name: ms-rewards
+          image: luuna/ms-rewards:latest        
+          imagePullPolicy: Always        
+          envFrom:
+          - configMapRef:
+              name: ms-rewards          
+          - secretRef:
+              name: ms-rewards
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "150m"
+            limits:
+              memory: "500Mi"
+              cpu: "250m"
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsGroup: 10000
+            runAsUser: 10000
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: backend
+      volumes:
+        - emptyDir: {}
+          name: tmp
+      restartPolicy: Always
+      serviceAccount: ms-rewards
+      serviceAccountName: ms-rewards

@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: gateway-zecore
+  name: gateway-zecore
+  namespace: client-gateway
+  annotations:
+    secret.reloader.stakater.com/reload: "gateway-zecore"
+    configmap.reloader.stakater.com/reload: "gateway-zecore"
+spec:
+  selector:
+    matchLabels:
+      app: gateway-zecore
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: gateway-zecore
+    spec:
+      containers:
+        - name: gateway-zecore
+          image: luuna/gateway:latest-develop
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /.well-known/apollo/server-health
+              port: 5000
+            successThreshold: 3
+            failureThreshold: 15
+            periodSeconds: 30
+          envFrom:
+            - configMapRef:
+                name: gateway-zecore
+            - secretRef:
+                name: gateway-zecore
+          resources:
+            requests:
+              memory: "250Mi"
+              cpu: "150m"
+            limits:
+              memory: "500Mi"
+              cpu: "250m"
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsGroup: 10000
+            runAsUser: 10000
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: backend
+      restartPolicy: Always
+      serviceAccount: gateway-zecore
+      serviceAccountName: gateway-zecore

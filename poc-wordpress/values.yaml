@@ -1,0 +1,28 @@
+wordpressUsername: admin
+wordpressPassword: admin
+
+multisite:
+  enable: false
+  host: ""
+
+nodeSelector:
+  purpose: tools
+
+mariadb:
+  enabled: false
+
+persistence:
+  enabled: true
+  storageClass: efs-sc
+  accessModes:
+    - ReadWriteOnce
+  size: 16Gi
+  
+service:
+  type: ClusterIP
+  
+externalDatabase:
+  host: "wordpress-poc-helm-kustomize.cbycl4rwnwxi.us-west-2.rds.amazonaws.com"
+  user: "admin"
+  database: "cuidando_suenos"
+  existingSecret: "poc-wordpress-mariadb"

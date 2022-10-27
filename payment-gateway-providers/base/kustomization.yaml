@@ -1,0 +1,7 @@
+resources:
+  - configmaps.yaml
+  - serviceaccount.yaml
+  - deployment.yaml
+  - networkpolicy.yaml
+  - service.yaml
+  - cronjob.yaml

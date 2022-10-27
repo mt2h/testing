@@ -1,0 +1,86 @@
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../../base/web
+  - ingresses
+
+configMapGenerator:
+  - name: client-api-luuna
+    namespace: client-api
+    literals:
+      - DEBUG="True"
+      - BRAND=LUUNA
+  - name: client-api-nooz
+    namespace: client-api
+    literals:
+      - DEBUG="True"
+      - BRAND=NOOZ
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: client-api-luuna
+      namespace: client-api
+    spec:
+      template:
+        spec:
+          containers:
+            - name: api
+              image: luuna/client-api:develop-803a024d3423bcf6c34b0da1a9f7517f8e0a962d
+              command:
+                - /code/Docker/entrypoint-develop.sh
+              envFrom:
+                - configMapRef:
+                    name: client-api
+                - configMapRef:
+                    name: client-api-luuna
+                - secretRef:
+                    name: client-api
+                - secretRef:
+                    name: client-api-luuna
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: client-api-luuna
+      namespace: client-api
+    spec:
+      minReplicas: 10
+      maxReplicas: 20
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: client-api-nooz
+      namespace: client-api
+    spec:
+      template:
+        spec:
+          containers:
+            - name: api
+              image: luuna/client-api:develop-803a024d3423bcf6c34b0da1a9f7517f8e0a962d
+              command:
+                - /code/Docker/entrypoint-develop.sh
+              envFrom:
+                - configMapRef:
+                    name: client-api
+                - configMapRef:
+                    name: client-api-nooz
+                - secretRef:
+                    name: client-api
+                - secretRef:
+                    name: client-api-nooz
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: client-api-nooz
+      namespace: client-api
+    spec:
+      minReplicas: 1
+      maxReplicas: 1

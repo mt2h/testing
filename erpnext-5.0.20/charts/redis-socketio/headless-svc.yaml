@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: erpnext-redis-socketio-headless
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: redis-socketio
+    helm.sh/chart: redis-socketio-16.4.0
+    app.kubernetes.io/instance: erpnext
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: tcp-redis
+      port: 6379
+      targetPort: redis
+  selector:
+    app.kubernetes.io/name: redis-socketio
+    app.kubernetes.io/instance: erpnext

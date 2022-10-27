@@ -1,0 +1,9 @@
+resources:
+  - deployment.yaml
+  - deployment-celery.yaml
+  - hpa.yaml
+  - hpa-celery.yaml
+  - service.yaml
+  - network-policy.yaml
+  - service-account.yaml
+  - cronjob.yaml

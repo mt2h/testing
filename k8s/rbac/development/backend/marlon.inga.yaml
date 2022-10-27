@@ -1,0 +1,43 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: marlon.inga
+  namespace: zeus
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/exec
+  - pods/log
+  - configmaps
+  - secrets
+  - services
+  - services/log
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  - pods/portforward
+  - services/portforward
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: marlon.inga
+  namespace: zeus
+subjects:
+- kind: User
+  name: marlon.inga
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: marlon.inga
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,6 @@
+resources:
+  - mariadb
+  - redis-cache 
+  - redis-queue 
+  - redis-socketio
+  

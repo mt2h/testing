@@ -1,0 +1,5 @@
+namespace: erpnext-5-0-20
+
+resources:
+  - ../../base
+  - ../../charts

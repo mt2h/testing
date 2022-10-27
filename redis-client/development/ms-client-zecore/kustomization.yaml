@@ -1,0 +1,10 @@
+
+namespace: client
+
+helmCharts:
+- name: redis
+  repo: https://charts.bitnami.com/bitnami
+  version: 15.7.0
+  releaseName: redis
+  valuesFile:  values.yaml
+  namespace: client

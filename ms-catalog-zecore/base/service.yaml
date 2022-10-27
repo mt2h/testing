@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ms-catalog-zecore
+    service: ms-catalog-zecore
+  name: ms-catalog-zecore
+  namespace: client
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  selector:
+    app: ms-catalog-zecore
+  type: ClusterIP

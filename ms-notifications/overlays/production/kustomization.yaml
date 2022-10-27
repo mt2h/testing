@@ -1,0 +1,33 @@
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+
+replicas:
+  - name: ms-notifications
+    count: 3
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ms-notifications
+      namespace: client-ms-notifications
+    spec:
+      template:
+        spec:
+          containers:
+          - name: ms-notifications
+            image: luuna/ms-notifications:master-f21b1ca5c226c92a7d545d2bc8ff961c36f44dd5
+            volumeMounts:
+              - name: firebase-config-volume
+                mountPath: /home/node/app/dist/auth/
+                readOnly: false
+          volumes:
+            - name: firebase-config-volume
+              secret:
+                secretName: firebase-admin-config

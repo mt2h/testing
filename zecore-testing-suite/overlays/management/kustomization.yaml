@@ -1,0 +1,36 @@
+namespace: stress
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: zecore-testing-suite
+      namespace: moon
+    spec:
+      template:
+        spec:
+          containers:
+            - name: zecore-testing-suite
+              image: luuna/zecore-testing-suite:master-decb9f41be2d04c2417b61d7a676b70936a8b299
+           
+  - |-
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: zecore-testing-suite
+      namespace: moon
+    data:
+      USERS: "4"
+      PERIOD: "5"
+      URL: "https://erp-staging-nodeselector.luuna.mx"
+      WORKFLOW: "create_crm_lead"
+      WAIT: "5"
+      AWS_REGION: "us-west-2"
+      AWS_BUCKET: "zecore-testing-suite"

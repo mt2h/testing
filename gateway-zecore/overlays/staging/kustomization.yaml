@@ -1,0 +1,42 @@
+resources:
+  - ../../base
+  - ingress.yaml
+
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+configMapGenerator:
+  - name: gateway-zecore
+    literals:
+      - APP_PORT="5000"
+      - PLAYGROUND="true"
+      - MS_CLIENT=http://ms-client-graphql.client.svc.cluster.local/graphql
+      - MS_CATALOG=http://ms-catalog-zecore.client.svc.cluster.local/graphql
+      
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: gateway-zecore
+      namespace: client-gateway
+    spec:
+      template:
+        metadata:
+          annotations:
+            kubectl.kubernetes.io/restartedAt: "2022-10-20T23:09:04Z"
+        spec:
+          containers:
+          - name: gateway-zecore
+            image: luuna/gateway:staging-886550c7f264c32a0b1c1b930f092b5ace386f92
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: gateway-zecore
+      namespace: client-gateway
+    spec:
+      minReplicas: 2
+      maxReplicas: 10

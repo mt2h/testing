@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: zecore-zeus-etl
+  annotations:
+    configmap.reloader.stakater.com/reload: "zecore-zeus-etl"
+    secret.reloader.stakater.com/reload: "zecore-zeus-etl"
+  name: zecore-zeus-etl
+  namespace: zeus
+spec:
+  selector:
+    matchLabels:
+      app: zecore-zeus-etl
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: zecore-zeus-etl
+    spec:
+      containers:
+        - name: zecore-zeus-etl
+          image: luuna/zecore_zeus_etl:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: zecore-zeus-etl
+          resources:
+            requests:
+              memory: "500Mi"
+              cpu: "150m"
+            limits:
+              memory: "1Gi"
+              cpu: "250m"
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 5
+            successThreshold: 1
+            timeoutSeconds: 3
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 5
+            successThreshold: 1
+            timeoutSeconds: 3
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsGroup: 10000
+            runAsUser: 10000
+      initContainers:
+        - name: migration
+          image: luuna/zecore_zeus_etl:latest
+          imagePullPolicy: Always
+          command:
+            - /bin/sh 
+          args:
+            - -c
+            - python manage.py migrate
+          envFrom:
+          - secretRef:
+              name: zecore-zeus-etl
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: backend
+      restartPolicy: Always
+      serviceAccount: zecore-zeus-etl
+      serviceAccountName: zecore-zeus-etl

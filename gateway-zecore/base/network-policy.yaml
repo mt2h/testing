@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-zecore
+  namespace: client-gateway
+spec:
+  podSelector:
+    matchLabels:
+      app: gateway-zecore
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: gateway-zecore
+      ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    - ports:
+        - protocol: TCP
+          port: 5671
+        - protocol: TCP
+          port: 5672
+        - protocol: TCP
+          port: 15964

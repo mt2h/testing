@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: zecore-testing-suite
+    service: zecore-testing-suite
+  name: zecore-testing-suite
+  namespace: moon
+spec:
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+  selector:
+    app: zecore-testing-suite
+  type: ClusterIP

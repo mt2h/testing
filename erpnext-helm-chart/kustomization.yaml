@@ -1,0 +1,7 @@
+helmCharts:
+- name: erpnext
+  repo: https://helm.erpnext.com
+  version: 5.0.20
+  releaseName: erpnext
+  valuesFile:  values.yaml
+  namespace: erpnext-helm-chart

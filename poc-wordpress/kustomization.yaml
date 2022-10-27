@@ -1,0 +1,15 @@
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ingress.yaml
+
+namespace: wordpresspoc
+
+helmCharts:
+- name: wordpress
+  repo: https://charts.bitnami.com/bitnami
+  version: 13.0.9
+  releaseName: wordpress
+  valuesFile:  values.yaml
+  namespace: wordpresspoc

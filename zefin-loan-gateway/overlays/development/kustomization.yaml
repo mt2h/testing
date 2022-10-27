@@ -1,0 +1,35 @@
+namespace: zefin
+
+#generators:
+#  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: zefin-loan-gateway
+      namespace: zefin
+    spec:
+      template:
+        spec:
+          containers:
+          - name: zefin-loan-gateway
+            image: luuna/zefin-loan-gateway:develop-0fed890806d719495bf236ee7ddc0b5f76991bd6
+
+  - |-
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: zefin-loan-gateway
+      namespace: zefin
+    data:
+      FLASK_APP: "app:create_app()"
+      FLASK_ENV: "development"
+      LOAN_APPLICATION_SERVICE_URL: "http://zefin-loan-origination-system"
+      ZECORE_CLIENT_GRAPHQL_SERVER: "http://ms-client-graphql.client.svc.cluster.local/graphql"
+      KYC_APPLICATION_SERVICE_URL: "http://zefin-middleware-kyc"

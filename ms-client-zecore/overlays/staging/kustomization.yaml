@@ -1,0 +1,76 @@
+resources:
+  - ../../base
+  #- ingresses
+
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+configMapGenerator:
+- name: ms-client
+  literals:
+  - FLASK_APP=app
+  - FLASK_ENV=production
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ms-client-celery
+      namespace: client
+    spec:
+      template:
+        spec:
+          containers:
+            - name: ms-client-celery
+              image: luuna/ms-client-zecore:zecore-staging-4cce4180b7c96312e542455413a8370b6e10e81a
+              envFrom:
+                - configMapRef:
+                    name: ms-client
+                - secretRef:
+                    name: ms-client
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: ms-client-celery
+      namespace: client
+    spec:
+      minReplicas: 1
+      maxReplicas: 2
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ms-client-graphql
+      namespace: client
+    spec:
+      template:
+        spec:
+          initContainers:
+            - name: migrations
+              image: luuna/ms-client-zecore:zecore-staging-4cce4180b7c96312e542455413a8370b6e10e81a
+              envFrom:
+                - configMapRef:
+                    name: ms-client
+                - secretRef:
+                    name: ms-client
+          containers:
+            - name: ms-client-graphql
+              image: luuna/ms-client-zecore:zecore-staging-4cce4180b7c96312e542455413a8370b6e10e81a
+              envFrom:
+                - configMapRef:
+                    name: ms-client
+                - secretRef:
+                    name: ms-client
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: ms-client-graphql
+      namespace: client
+    spec:
+      minReplicas: 1
+      maxReplicas: 2

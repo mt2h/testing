@@ -1,0 +1,74 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "True"
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "True"
+    nginx.ingress.kubernetes.io/use-regex: "True"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      location ~* "^/" {
+        proxy_pass https://d1crvq4zuhdsef.cloudfront.net/503_luuna/index.html?$1;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      #location ^~ /rem/ {
+      #  proxy_pass https://rem-lb-1822895894.us-west-2.elb.amazonaws.com/;
+      #  proxy_set_header X-Real-IP $remote_addr;
+      #  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      #  proxy_set_header X-Forwarded-Proto $scheme;
+      #}
+      
+      #location ^~ /cuidando-suenos/ {
+      #  proxy_pass https://cuidando.luuna.mx/;
+      #  proxy_set_header X-Real-IP $remote_addr;
+      #  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      #  proxy_set_header X-Forwarded-Proto $scheme;
+      #}
+
+      #location ^~ /descanso/ {
+      #  proxy_pass https://descanso.luuna.mx/;
+      #  proxy_set_header X-Real-IP $remote_addr;
+      #  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      #  proxy_set_header X-Forwarded-Proto $scheme;
+      #}
+
+      #location ^~ /registra-tu-producto/ {
+      #  proxy_pass https://colchones.luuna.mx/registra-tu-producto/;
+      #  proxy_set_header X-Real-IP $remote_addr;
+      #  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      #  proxy_set_header X-Forwarded-Proto $scheme;
+      #}
+
+      #location /unboxing {
+      #  rewrite ^/unboxing$ https://colchones.luuna.mx/unboxing-luuna/ redirect;
+      #}
+
+      location /custom_50x/ {
+        proxy_pass https://d1crvq4zuhdsef.cloudfront.net/503_luuna/;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      error_page 500 502 503 504 /custom_50x/index.html;
+      location /error_testing {
+          fastcgi_pass unix:/does/not/exist;
+      }
+
+  name: web-client-luuna
+  namespace: web-client
+spec:
+  rules:
+    - host: old.luuna.mx
+      http:
+        paths:
+          - backend:
+              service:
+                name: web-client-luuna
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific

@@ -1,0 +1,74 @@
+resources:
+  - ../../base
+  - ingress.yaml
+
+namespace: zeus
+
+generators:
+  - secret-generator.yaml
+
+configMapGenerator:
+- name: zecore-zeus-etl
+  literals:
+  - DEBUG=False
+  - PORT="8000"
+  - TIME_ZONE=America/Mexico_City
+  - LANGUAGE_CODE=en-EN
+  - DOMAIN=zecore-zeus-etl-staging.zebrands.mx
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: zecore-zeus-etl
+      namespace: zeus
+    spec:
+      template:
+        spec:
+          containers:
+            - name: zecore-zeus-etl
+              image: luuna/zecore_zeus_etl:staging-1d74862e1c9e949e6ee6e4fc75b48120149e81c3
+              envFrom:
+                - configMapRef:
+                    name: zecore-zeus-etl
+                - secretRef:
+                    name: zecore-zeus-etl
+          initContainers:
+            - name: migration
+              image: luuna/zecore_zeus_etl:staging-1d74862e1c9e949e6ee6e4fc75b48120149e81c3
+              envFrom:
+                - configMapRef:
+                    name: zecore-zeus-etl
+                - secretRef:
+                   name: zecore-zeus-etl
+  - |-
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: fetch-liverpool
+        namespace: zeus
+      spec:
+        schedule: 0 10 * * *
+        jobTemplate:
+          spec:
+            template:
+              spec:
+                containers:
+                - name: manage
+                  image: luuna/zecore_zeus_etl:staging-1d74862e1c9e949e6ee6e4fc75b48120149e81c3
+                  envFrom:
+                    - configMapRef:
+                        name: zecore-zeus-etl
+                    - secretRef:
+                        name: zecore-zeus-etl
+                        
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: zecore-zeus-etl
+      namespace: zeus
+    spec:
+      minReplicas: 1
+      maxReplicas: 2

@@ -1,0 +1,9 @@
+prometheus:
+    enabled: true
+    
+installCRDs: true
+
+replicaCount: 1
+
+nodeSelector:
+  purpose: tools

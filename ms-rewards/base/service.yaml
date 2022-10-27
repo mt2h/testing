@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ms-rewards
+    service: ms-rewards
+  name: ms-rewards
+  namespace: client-ms-rewards
+spec:
+  ports:
+    - port: 80
+      targetPort: 5000
+      protocol: TCP
+  selector:
+    app: ms-rewards
+  type: ClusterIP

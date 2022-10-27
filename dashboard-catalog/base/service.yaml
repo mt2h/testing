@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: dashboard-catalog
+    service: dashboard-catalog
+  name: dashboard-catalog
+  namespace: client-dashboard-catalog
+spec:
+  ports:
+    - port: 80
+      targetPort: 5000
+      protocol: TCP
+  selector:
+    app: dashboard-catalog
+  type: ClusterIP

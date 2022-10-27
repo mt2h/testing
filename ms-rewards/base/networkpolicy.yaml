@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ms-rewards
+  namespace: client-ms-rewards
+spec:
+  podSelector:
+    matchLabels:
+      app: ms-rewards
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ms-rewards
+      ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    - ports:
+        - protocol: TCP
+          port: 5671
+        - protocol: TCP
+          port: 5672
+        - protocol: TCP
+          port: 15964

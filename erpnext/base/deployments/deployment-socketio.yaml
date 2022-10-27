@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: erpnext-socketio
+  namespace: erpnext
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: erpnext-socketio
+      app.kubernetes.io/instance: erpnext-socketio
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: erpnext-socketio
+        app.kubernetes.io/instance: erpnext-socketio
+        frappe-component: erpnext-socketio
+    spec:
+      nodeSelector:
+        purpose: socketio
+      imagePullSecrets:
+        - name: docker-creds
+      serviceAccountName: erpnext
+      securityContext:
+        supplementalGroups:
+        - 1000
+      containers:
+        - name: erpnext
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+              - CAP_CHOWN
+            runAsUser: 0
+          image: "luuna/frappe-socketio:v13.4.1"
+          volumeMounts:
+          - name: sites-dir
+            mountPath: /home/frappe/frappe-bench/sites
+          - name: logs
+            mountPath: /home/frappe/frappe-bench/logs
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: 9000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 9000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            limits:
+              cpu: 300m
+              memory: 1280Mi
+            requests:
+              cpu: 200m
+              memory: 1Gi
+      volumes:
+        - name: sites-dir
+          persistentVolumeClaim:
+            claimName: erpnext
+            readOnly: false
+        - name: logs
+          emptyDir: {}

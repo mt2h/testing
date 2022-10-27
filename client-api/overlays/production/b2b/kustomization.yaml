@@ -1,0 +1,47 @@
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../../base/b2b
+  #- ingress.yaml
+
+configMapGenerator:
+  - name: client-api-b2b
+    namespace: client-api
+    literals:
+      - DEBUG="False"
+      - BRAND=LUUNA
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: client-api-b2b
+      namespace: client-api
+    spec:
+      template:
+        spec:
+          containers:
+            - name: api
+              image: luuna/client-api:master-2a0c7fa702fd81722d5a37fbe28f7ceb84c5cdb5
+              command:
+                - /code/Docker/entrypoint-production.sh
+              envFrom:
+                - configMapRef:
+                    name: client-api       
+                - configMapRef:
+                    name: client-api-b2b
+                - secretRef:
+                    name: client-api-b2b
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: client-api-b2b
+      namespace: client-api
+    spec:
+      minReplicas: 1
+      maxReplicas: 1

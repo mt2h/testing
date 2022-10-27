@@ -1,0 +1,12 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: zecore-testing-suite
+  namespace: moon
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: "500Gi"
+  storageClassName: efs-sc

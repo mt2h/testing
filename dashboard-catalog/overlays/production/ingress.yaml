@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: dashboard-catalog
+  namespace: client-dashboard-catalog
+spec:
+  rules:
+    - host: dashboard-catalog.luuna.mx
+      http:
+        paths:
+          - backend:
+              service:
+                name: dashboard-catalog
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific

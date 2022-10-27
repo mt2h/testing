@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: ms-rewards
+  namespace: client-ms-rewards
+spec:
+  rules:
+    - host: rewards-api.luuna.mx
+      http:
+        paths:
+          - backend:
+              service:
+                name: ms-rewards
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific

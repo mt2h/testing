@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: dashboard-rewards
+  name: dashboard-rewards
+  namespace: client-dashboard-rewards
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard-rewards
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: dashboard-rewards
+    spec:
+      containers:
+        - name: dashboard-rewards
+          image: luuna/dashboard-rewards:latest-develop
+          imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+              scheme: HTTP
+            successThreshold: 3
+            failureThreshold: 6
+            periodSeconds: 10
+          envFrom:
+            - secretRef:
+                name: dashboard-rewards
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "150m"
+            limits:
+              memory: "500Mi"
+              cpu: "250m"
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsGroup: 10000
+            runAsUser: 10000
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: frontend
+      restartPolicy: Always
+      serviceAccount: dashboard-rewards
+      serviceAccountName: dashboard-rewards

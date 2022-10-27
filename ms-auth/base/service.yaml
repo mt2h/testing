@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ms-auth
+    service: ms-auth
+  name: ms-auth
+  namespace: client-ms-auth
+spec:
+  ports:
+    - port: 80
+      targetPort: 5000
+      protocol: TCP
+  selector:
+    app: ms-auth
+  type: ClusterIP

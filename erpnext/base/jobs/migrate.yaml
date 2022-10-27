@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate
+  namespace: erpnext
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    #argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  ttlSecondsAfterFinished: 60
+  backoffLimit: 2
+  template:
+    spec:
+      containers:
+        - name: migrate-sites
+          image: luuna/erpnext-worker:latest-develop
+          imagePullPolicy: Always
+          args: ["migrate"]
+          volumeMounts:
+            - name: sites-dir
+              mountPath: /home/frappe/frappe-bench/sites
+      securityContext:
+        supplementalGroups: [1000] 
+      imagePullSecrets:
+        - name: docker-creds
+      restartPolicy: Never
+      volumes:
+        - name: sites-dir
+          persistentVolumeClaim:
+            claimName: erpnext
+            readOnly: false

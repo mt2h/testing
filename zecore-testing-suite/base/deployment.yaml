@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: zecore-testing-suite
+  name: zecore-testing-suite
+  namespace: moon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zecore-testing-suite
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        configmap.reloader.stakater.com/reload: "zecore-testing-suite"
+        secret.reloader.stakater.com/reload: "zecore-testing-suite"          
+      labels:
+        app: zecore-testing-suite
+    spec:              
+      containers:
+        - name: zecore-testing-suite
+          image: luuna/zecore-testing-suite:master
+          imagePullPolicy: Always
+          envFrom:
+          - configMapRef:
+              name: zecore-testing-suite         
+          - secretRef:
+              name: zecore-testing-suite
+          command:
+            - sleep
+          args:
+            - infinity  
+          #volumeMounts:
+          #  - name: app
+          #    mountPath: /app                      
+          #readinessProbe:
+          #  httpGet:
+          #    path: /_health
+          #    port: 8000
+          #    scheme: HTTP
+          #  failureThreshold: 5
+          #  successThreshold: 1
+          #  periodSeconds: 10
+          #  timeoutSeconds: 7
+          #livenessProbe:
+          #  httpGet:
+          #    path: /_health
+          #    port: 8000
+          #  initialDelaySeconds: 5
+          #  periodSeconds: 5     
+          #resources:
+          #  requests:
+          #    memory: "100Mi"
+          #    cpu: "150m"
+          #  limits:
+          #    memory: "500Mi"
+          #    cpu: "250m" 
+      #volumes: 
+      # - name: app
+      #   persistentVolumeClaim:
+      #     claimName: zecore-testing-suite
+      #     readOnly: false        
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: stress
+      restartPolicy: Always
+      serviceAccount: zecore-testing-suite
+      serviceAccountName: zecore-testing-suite

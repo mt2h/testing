@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: erpnext-socketio
+  labels:
+    helm.sh/chart: erpnext-5.0.20
+    app.kubernetes.io/name: erpnext
+    app.kubernetes.io/instance: erpnext
+    app.kubernetes.io/version: "v14.2.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: erpnext-socketio
+      app.kubernetes.io/instance: erpnext-socketio
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: erpnext-socketio
+        app.kubernetes.io/instance: erpnext-socketio
+    spec:
+      serviceAccountName: erpnext
+      securityContext:
+        supplementalGroups:
+        - 1000
+      containers:
+        - name: socketio
+          securityContext:
+            capabilities:
+              add:
+              - CAP_CHOWN
+          image: "frappe/frappe-socketio:v14.8.0"
+          volumeMounts:
+          - name: sites-dir
+            mountPath: /home/frappe/frappe-bench/sites
+          - name: logs
+            mountPath: /home/frappe/frappe-bench/logs
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+          livenessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            tcpSocket:
+              port: 9000
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            tcpSocket:
+              port: 9000
+          resources:
+            {}
+      volumes:
+        - name: sites-dir
+          persistentVolumeClaim:
+            claimName: erpnext
+            readOnly: false
+        - name: logs
+          emptyDir: {}

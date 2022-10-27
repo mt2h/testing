@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ms-notifications
+    service: ms-notifications
+  name: ms-notifications
+  namespace: client-ms-notifications
+spec:
+  ports:
+    - port: 8000
+      protocol: TCP
+  selector:
+    app: ms-notifications
+  type: ClusterIP

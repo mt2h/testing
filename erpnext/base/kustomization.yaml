@@ -1,0 +1,9 @@
+resources:
+  - deployments
+  - hpa
+  - pvc
+  - services
+  - sa
+  - jobs
+  - secrets
+  - cronjobs

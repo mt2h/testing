@@ -1,0 +1,33 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: jony
+  namespace: shipping
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/exec
+  - pods/portforward
+  verbs:
+  - get
+  - list
+  - delete
+  - watch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jony
+  namespace: shipping
+subjects:
+- kind: User
+  name: jony
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: jony
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ms-client-celery
+  annotations:
+    configmap.reloader.stakater.com/reload: "ms-client"
+    secret.reloader.stakater.com/reload: "ms-client"
+  name: ms-client-celery
+  namespace: client
+spec:
+  selector:
+    matchLabels:
+      app: ms-client-celery
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ms-client-celery
+    spec:
+      containers:
+        - name: ms-client-celery
+          image: luuna/ms-client-zecore:latest
+          imagePullPolicy: Always
+          command: ["celery"]
+          args: ["-A", "app.graphql_server.celery_app", "worker", "-Q", "ms_client_queue", "--loglevel=info", "--without-heartbeat"]
+          envFrom:
+            - secretRef:
+                name: ms-client
+          livenessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - celery -A app.graphql_server.celery_app inspect ping --destination celery@${HOSTNAME}
+            initialDelaySeconds: 90
+            periodSeconds: 180
+            failureThreshold: 5
+            successThreshold: 1
+            timeoutSeconds: 30
+          readinessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - celery -A app.graphql_server.celery_app inspect ping --destination celery@${HOSTNAME}
+            initialDelaySeconds: 60
+            periodSeconds: 120
+            failureThreshold: 5
+            successThreshold: 1
+            timeoutSeconds: 30
+          resources:
+            requests:
+              memory: "350Mi"
+              cpu: "250m"
+            limits:
+              memory: "500Mi"
+              cpu: "500m"
+          securityContext:
+            readOnlyRootFilesystem: false
+            runAsGroup: 10000
+            runAsUser: 10000
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: backend
+      restartPolicy: Always
+      serviceAccount: ms-client
+      serviceAccountName: ms-client

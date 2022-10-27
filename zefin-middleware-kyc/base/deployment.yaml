@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: zefin-middleware-kyc
+  name: zefin-middleware-kyc
+  annotations:
+    configmap.reloader.stakater.com/reload: "zefin-middleware-kyc"
+    secret.reloader.stakater.com/reload: "zefin-middleware-kyc" 
+  namespace: zefin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zefin-middleware-kyc
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:   
+      labels:
+        app: zefin-middleware-kyc
+    spec:                   
+      containers:
+        - name: zefin-middleware-kyc
+          image: luuna/zefin-middleware-kyc:latest
+          imagePullPolicy: Always
+          envFrom:
+          - configMapRef:
+              name: zefin-middleware-kyc         
+          - secretRef:
+              name: zefin-middleware-kyc
+          #readinessProbe:
+          #  httpGet:
+          #    path: /_health
+          #    port: 8000
+          #    scheme: HTTP
+          #  failureThreshold: 5
+          #  successThreshold: 1
+          #  periodSeconds: 10
+          #  timeoutSeconds: 7              
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "150m"
+            limits:
+              memory: "500Mi"
+              cpu: "250m"
+          volumeMounts:
+            - mountPath: /tmp
+              name: app          
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsGroup: 10000
+            runAsUser: 10000
+      volumes:
+      - name: app
+        emptyDir: {}            
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: backend
+      restartPolicy: Always
+      serviceAccount: zefin-middleware-kyc
+      serviceAccountName: zefin-middleware-kyc

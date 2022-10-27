@@ -1,0 +1,7 @@
+resources:
+  - config-maps.yaml
+  - service-account.yaml
+  - deployments
+  - network-policies
+  - services
+  - hpa

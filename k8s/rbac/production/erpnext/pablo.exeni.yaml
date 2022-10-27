@@ -1,0 +1,40 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pablo.exeni
+  namespace: erpnext
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/log
+  - configmaps
+  - services
+  - services/log
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/portforward
+  - services/portforward
+  - pods/exec
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pablo.exeni
+  namespace: erpnext
+subjects:
+- kind: User
+  name: pablo.exeni
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pablo.exeni
+  apiGroup: rbac.authorization.k8s.io

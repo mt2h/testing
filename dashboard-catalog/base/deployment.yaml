@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: dashboard-catalog
+  name: dashboard-catalog
+  namespace: client-dashboard-catalog
+  annotations:
+    secret.reloader.stakater.com/reload: "dashboard-catalog-secrets"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard-catalog
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: dashboard-catalog
+    spec:
+      containers:
+        - name: dashboard-catalog
+          image: luuna/dashboard-catalog:latest-develop
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: dashboard-catalog-secrets
+          readinessProbe:
+            httpGet:
+              path: /dashboard
+              port: 5000
+              scheme: HTTP
+            failureThreshold: 5
+            successThreshold: 5
+            periodSeconds: 10
+            timeoutSeconds: 30
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "150m"
+            limits:
+              memory: "500Mi"
+              cpu: "250m"
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsGroup: 10000
+            runAsUser: 10000
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+      initContainers:
+        - name: init-migrate
+          image: luuna/dashboard-catalog:latest-develop
+          imagePullPolicy: Always
+          command: ['sh', '-c', 'flask db upgrade --directory=/home/python/app/src/migrations']
+          envFrom:
+            - secretRef:
+                name: dashboard-catalog-secrets
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: backend
+      volumes:
+        - emptyDir: {}
+          name: tmp
+      restartPolicy: Always
+      serviceAccount: dashboard-catalog
+      serviceAccountName: dashboard-catalog

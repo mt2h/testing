@@ -1,0 +1,103 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: ms-onfleet
+  namespace: shipping
+spec:
+  rules:
+    - host: shipping-staging.zebrands.mx
+      http:
+        paths:
+        - path: /api/v1/auth
+          pathType: Prefix
+          backend:
+            service:
+              name: ms-onfleet
+              port:
+                number: 80   
+        - path: /api/v1/users
+          pathType: Prefix
+          backend:
+            service:
+              name: ms-onfleet
+              port:
+                number: 80                    
+        - path: /api/v1/tasks
+          pathType: Prefix
+          backend:
+            service:
+              name: ms-onfleet
+              port:
+                number: 80
+        - path: /api/v1/tasks/short_id/
+          pathType: Prefix
+          backend:
+            service:
+              name: ms-onfleet
+              port:
+                number: 80                                            
+        - path: /api/v1/tasks/barcodes/short_id/ 
+          pathType: Prefix
+          backend:
+            service:
+              name: ms-onfleet
+              port:
+                number: 80
+        - path: /api/v1/webhooks/started
+          pathType: Prefix
+          backend:
+            service:
+              name: ms-onfleet
+              port:
+                number: 80
+        - path: /api/v1/webhooks/completed
+          pathType: Prefix
+          backend:
+            service:
+              name: ms-onfleet
+              port:
+                number: 80 
+        - path: /api/v1/webhooks/failed
+          pathType: Prefix
+          backend:
+            service:
+              name: ms-onfleet
+              port:
+                number: 80 
+        - path: /api/v1/webhooks/register 
+          pathType: Prefix
+          backend:
+            service:
+              name: ms-onfleet
+              port:
+                number: 80 
+        - path: /api/v1/teams/ 
+          pathType: Prefix
+          backend:
+            service:
+              name: ms-onfleet
+              port:
+                number: 80 
+        - path: /api/v1/workers/tasks/short_id/ 
+          pathType: Prefix
+          backend:
+            service:
+              name: ms-onfleet
+              port:
+                number: 80 
+        - path: /api/v1/events
+          pathType: Prefix
+          backend:
+            service:
+              name: ms-onfleet
+              port:
+                number: 80  
+        - path: /api/v1/webhooks_missing
+          pathType: Prefix
+          backend:
+            service:
+              name: ms-onfleet
+              port:
+                number: 80                

@@ -1,0 +1,12 @@
+generators:
+  - secret-generator.yaml
+
+namespace: zeus
+
+helmCharts:
+- name: postgresql
+  repo: https://charts.bitnami.com/bitnami
+  version: 10.14.3
+  releaseName: postgresql
+  valuesFile:  values.yaml
+  namespace: zeus

@@ -1,0 +1,8 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ms-rewards
+  namespace: client-ms-rewards
+data:
+  app_port: "5000"

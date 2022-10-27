@@ -1,0 +1,6 @@
+resources:
+  - client
+  - monitoring
+  - payments
+  - shipping
+  - zeus

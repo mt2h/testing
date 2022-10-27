@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ms-brands
+    squad: client
+  name: ms-brands
+  namespace: client-ms-brands
+spec:
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: ms-brands
+  strategy:
+    rollingUpdate:
+      maxSurge: 75%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ms-brands
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - name: ms-brands
+          envFrom:     
+            - secretRef:
+                name: ms-brands
+          image: luuna/ms-brands:latest-staging
+          imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 3
+            failureThreshold: 6
+            timeoutSeconds: 30
+          resources:
+            requests:
+              memory: "450Mi"
+              cpu: "150m"
+            limits:
+              memory: "600Mi"
+              cpu: "250m"
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsGroup: 10000
+            runAsUser: 10000
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: backend
+      restartPolicy: Always

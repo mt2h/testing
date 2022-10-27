@@ -1,0 +1,15 @@
+resources:
+  - deployment-erpnext.yaml
+  - deployment-redis-cache.yaml
+  - deployment-redis-queue.yaml
+  - deployment-redis-socketio.yaml
+  - deployment-scheduler.yaml
+  - deployment-socketio.yaml
+  - deployment-worker-default.yaml
+  - deployment-worker-long.yaml
+  - deployment-worker-short.yaml
+  - deployment-worker-payments.yaml
+  - deployment-worker-shipping.yaml
+  - deployment-worker-repost.yaml
+  - deployment-worker-wms.yaml
+  - deployment-worker-wms-dtc.yaml

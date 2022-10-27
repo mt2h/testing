@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ms-catalog
+    service: ms-catalog
+  name: ms-catalog
+  namespace: client-ms-catalog
+spec:
+  ports:
+    - port: 80
+      targetPort: 5000
+      protocol: TCP
+  selector:
+    app: ms-catalog
+  type: ClusterIP

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: zecore-zeus-etl
+    service: zecore-zeus-etl
+  name: zecore-zeus-etl
+  namespace: zeus
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  selector:
+    app: zecore-zeus-etl
+  type: ClusterIP

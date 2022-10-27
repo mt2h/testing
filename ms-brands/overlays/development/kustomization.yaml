@@ -1,0 +1,31 @@
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ms-brands
+      namespace: client-ms-brands
+    spec:
+      template:
+        spec:
+          containers:
+          - name: ms-brands
+            image: luuna/ms-brands:develop-a98314094a9473bd403c8e455bf84d200f7e6e7f
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: ms-brands
+      namespace: client-ms-brands
+    spec:
+      minReplicas: 1
+      maxReplicas: 1

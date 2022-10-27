@@ -1,0 +1,83 @@
+resources:
+  - ../../base
+  - ingresses
+
+namespace: client
+
+configMapGenerator:
+  - name: luuna-sitemap-zecore
+    files:
+      - sitemap.xml=luuna.sitemap.xml
+  - name: nooz-sitemap-zecore
+    files:
+      - sitemap.xml=nooz.sitemap.xml
+  - name: mappa-sitemap-zecore
+    files:
+      - sitemap.xml=mappa.sitemap.xml      
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: web-client-luuna-zecore
+      namespace: web-client
+    spec:
+      template:
+        spec:
+          containers:
+            - name: web-client
+              image: luuna/web-v2-luuna:zecore-staging-e0851439d782f7060df383b46acdad400d217cc5
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: web-client-luuna-zecore
+      namespace: web-client
+    spec:
+      minReplicas: 1
+      maxReplicas: 5
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: web-client-nooz-zecore
+      namespace: web-client
+    spec:
+      template:
+        spec:
+          containers:
+            - name: web-client
+              image: luuna/web-v2-nooz:zecore-staging-e0851439d782f7060df383b46acdad400d217cc5
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: web-client-nooz-zecore
+      namespace: web-client
+    spec:
+      minReplicas: 1
+      maxReplicas: 5
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: web-client-mappa-zecore
+      namespace: web-client
+    spec:
+      template:
+        spec:
+          containers:
+            - name: web-client
+              image: luuna/web-v2-mappa:zecore-staging-e0851439d782f7060df383b46acdad400d217cc5
+                
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: web-client-mappa-zecore
+      namespace: web-client
+    spec:
+      minReplicas: 1
+      maxReplicas: 5

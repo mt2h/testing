@@ -1,0 +1,43 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      if ($host = erp-development.luuna.mx) {
+        return 301 https://erp-development.zebrands.mx$request_uri;
+      }
+      location /metrics {
+        allow 10.1.0.0/16;
+        allow 10.2.0.0/16;
+        allow 10.3.0.0/16;
+        deny all;
+      }
+  name: erpnext
+  namespace: erpnext
+spec:
+  rules:
+  - host: erp-development.zebrands.mx
+    http:
+      paths:
+      - backend:
+          service:
+            name: erpnext
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+  - host: erp-development.luuna.mx
+    http:
+      paths:
+      - backend:
+          service:
+            name: erpnext
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific

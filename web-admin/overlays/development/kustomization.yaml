@@ -1,0 +1,33 @@
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: web-admin
+      namespace: web-admin
+    spec:
+      template:
+        spec:
+          containers:
+          - name: web-admin
+            image: luuna/web-admin:develop-990b02cda3e7d7d620da927d79e790d04c25ce11
+            command:
+              - /code/Docker/entrypoint-develop.sh
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: web-admin
+      namespace: web-admin
+    spec:
+      minReplicas: 1
+      maxReplicas: 5

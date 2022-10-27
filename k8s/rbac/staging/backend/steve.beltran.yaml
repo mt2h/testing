@@ -1,0 +1,82 @@
+###################### PAYMENTS ######################
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: steve.beltran
+  namespace: payments
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/log
+  - configmaps
+  - services
+  - services/log
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/portforward
+  - services/portforward
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: steve.beltran
+  namespace: payments
+subjects:
+- kind: User
+  name: steve.beltran
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: steve.beltran
+  apiGroup: rbac.authorization.k8s.io
+---
+####################### CLIENT #######################
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: steve.beltran
+  namespace: client
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/log
+  - configmaps
+  - services
+  - services/log
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/portforward
+  - services/portforward
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: steve.beltran
+  namespace: client
+subjects:
+- kind: User
+  name: steve.beltran
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: steve.beltran
+  apiGroup: rbac.authorization.k8s.io

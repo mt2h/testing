@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ms-notifications
+  annotations:
+    configmap.reloader.stakater.com/reload: "ms-notifications"
+    secret.reloader.stakater.com/reload: "ms-notifications"
+  name: ms-notifications
+  namespace: client-ms-notifications
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-notifications
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ms-notifications
+    spec:
+      containers:
+        - name: ms-notifications
+          image: luuna/ms-notifications:37871c95d38ee789c298f6742b3b558c95868a5f
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: ms-notifications
+            - secretRef:
+                name: ms-notifications
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+              scheme: HTTP
+            failureThreshold: 5
+            successThreshold: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+          resources:
+            requests:
+              memory: "250Mi"
+              cpu: "150m"
+            limits:
+              memory: "500Mi"
+              cpu: "250m"
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsGroup: 10000
+            runAsUser: 10000              
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: backend
+      restartPolicy: Always
+      serviceAccount: ms-notifications
+      serviceAccountName: ms-notifications

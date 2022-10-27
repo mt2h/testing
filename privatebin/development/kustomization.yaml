@@ -1,0 +1,10 @@
+#resources:
+#  - ../../base
+
+helmCharts:
+- name: privatebin
+  repo: https://privatebin.github.io/helm-chart
+  version: 0.14.0
+  releaseName: privatebin
+  valuesFile:  values.yaml
+  namespace: privatebin

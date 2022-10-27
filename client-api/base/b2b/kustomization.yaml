@@ -1,0 +1,5 @@
+resources:
+  - deployment.yaml
+  - network_policies.yaml
+  #- services.yaml
+  - hpa.yaml

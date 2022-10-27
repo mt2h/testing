@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-db
+  namespace: zeus
+spec:
+  schedule: 0 9 * * 1
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            cron: zecore-zeus-etl-backup
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: postgres:13-alpine3.16
+              envFrom:
+              - secretRef:
+                  name: zecore-zeus-etl
+              args:
+                - /bin/sh
+                - -c
+                - |
+                  apk -v --update add --no-cache py-pip openssh-client 
+                  pip install --upgrade pip
+                  pip install --upgrade awscli==1.25.11 s3cmd==2.0.1 python-magic
+                  rm -f /var/cache/apk/*
+                  cd /tmp/
+                  echo "Backup started for database - ${DB_NAME}"
+                  FILE=`date +%Y%m%d_%H%M%S`_${DB_NAME}.sql
+                  PGPASSWORD=$DB_PASSWORD pg_dump --no-owner -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} ${DB_NAME} > $FILE;
+                  tar -czvf $FILE.tar.gz $FILE
+                  aws s3 cp $FILE.tar.gz $AWS_BUCKET_BACKUP
+                  rm $FILE && rm $FILE.tar.gz
+                  echo "Dump SQL completed"  
+  successfulJobsHistoryLimit: 3
+  suspend: false
+

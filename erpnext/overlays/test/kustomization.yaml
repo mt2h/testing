@@ -1,0 +1,342 @@
+namespace: erpnext-test
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+generators:
+  - secret-generator.yaml
+
+configMapGenerator:
+- name: erpnext
+  literals:
+  - BUCKET_DIR=staging
+- name: erpnext-assets
+  literals:
+  - WEB_PORT=80
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: erpnext-erpnext
+      namespace: erpnext
+    spec:
+      template:
+        spec:
+          containers:
+          - name: erpnext-assets
+            image: luuna/erpnext-nginx:test-20221027-150342
+            envFrom:
+            - configMapRef:
+                name: erpnext-assets
+          - name: erpnext-python
+            image: luuna/erpnext-worker:test-20221027-150342
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: erpnext-scheduler
+      namespace: erpnext
+    spec:
+      template:
+        spec:
+          containers:
+          - name: erpnext
+            image: luuna/erpnext-worker:test-20221027-150342
+
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: erpnext-socketio
+      namespace: erpnext
+    spec:
+      template:
+        spec:
+          containers:
+          - name: erpnext
+            image: luuna/frappe-socketio:v13.4.1            
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: erpnext-worker-d
+      namespace: erpnext
+    spec:
+      template:
+        spec:
+          containers:
+          - name: erpnext
+            image: luuna/erpnext-worker:test-20221027-150342
+
+            
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: erpnext-worker-l
+      namespace: erpnext
+    spec:
+      template:
+        spec:
+          containers:
+          - name: erpnext
+            image: luuna/erpnext-worker:test-20221027-150342
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: erpnext-worker-s
+      namespace: erpnext
+    spec:
+      template:
+        spec:
+          containers:
+          - name: erpnext
+            image: luuna/erpnext-worker:test-20221027-150342
+
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: erpnext-worker-payments
+      namespace: erpnext
+    spec:
+      template:
+        spec:
+          containers:
+          - name: erpnext
+            image: luuna/erpnext-worker:test-20221027-150342
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: erpnext-worker-shipping
+      namespace: erpnext
+    spec:
+      template:
+        spec:
+          containers:
+          - name: erpnext
+            image: luuna/erpnext-worker:test-20221027-150342
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: erpnext-worker-repost
+      namespace: erpnext
+    spec:
+      template:
+        spec:
+          containers:
+          - name: erpnext
+            image: luuna/erpnext-worker:test-20221027-150342
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: erpnext-worker-wms
+      namespace: erpnext
+    spec:
+      template:
+        spec:
+          containers:
+          - name: erpnext
+            image: luuna/erpnext-worker:test-20221027-150342
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: erpnext-worker-wms-dtc
+      namespace: erpnext
+    spec:
+      template:
+        spec:
+          containers:
+          - name: erpnext
+            image: luuna/erpnext-worker:test-20221027-150342
+
+#   - |-
+#     apiVersion: batch/v1
+#     kind: Job
+#     metadata:
+#       name: backup-and-push-job
+#       namespace: erpnext
+#     spec:
+#       template:
+#         spec:
+#           containers:
+#           - name: push-backup
+#             image: luuna/erpnext-worker:test-20221027-150342
+#           initContainers:
+#           - name: backup
+#             image: luuna/erpnext-worker:test-20221027-150342
+
+  - |-
+    apiVersion: batch/v1
+    kind: CronJob
+    metadata:
+      name: backup-and-push-job
+      namespace: erpnext
+    spec:
+      schedule: 0 5 * * 0
+      concurrencyPolicy: Allow
+      failedJobsHistoryLimit: 1
+      jobTemplate:
+        spec:
+          ttlSecondsAfterFinished: 60
+          backoffLimit: 1
+          template:
+            spec:
+              automountServiceAccountToken: true
+              containers:
+              - name: push-backup
+                image: luuna/erpnext-worker:test-20221027-150342
+                imagePullPolicy: Always
+                envFrom:
+                - secretRef:
+                    name: s3
+                - configMapRef:
+                    name: erpnext
+                args:
+                - push-backup
+                resources: {}
+                terminationMessagePath: /dev/termination-log
+                terminationMessagePolicy: File
+                volumeMounts:
+                - mountPath: /home/frappe/frappe-bench/sites
+                  mountPropagation: None
+                  name: sites-dir
+              dnsPolicy: ClusterFirst
+              enableServiceLinks: true
+              imagePullSecrets:
+              - name: docker-creds
+              initContainers:
+              - name: backup
+                args:
+                - backup
+                env:
+                - name: WITH_FILES
+                  value: "1"
+                image: luuna/erpnext-worker:test-20221027-150342
+                imagePullPolicy: Always
+                envFrom:
+                - secretRef:
+                    name: mariadb
+                resources: {}
+                terminationMessagePath: /dev/termination-log
+                terminationMessagePolicy: File
+                volumeMounts:
+                - mountPath: /home/frappe/frappe-bench/sites
+                  mountPropagation: None
+                  name: sites-dir
+              restartPolicy: Never
+              schedulerName: default-scheduler
+              securityContext:
+                runAsNonRoot: false
+                supplementalGroups:
+                - 1000
+              shareProcessNamespace: false
+              terminationGracePeriodSeconds: 30
+              volumes:
+              - name: sites-dir
+                persistentVolumeClaim:
+                  claimName: erpnext
+      successfulJobsHistoryLimit: 3
+      suspend: true
+
+  - |-
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: migrate
+      namespace: erpnext
+    spec:
+      template:
+        spec:
+          containers:
+          - name: migrate-sites
+            image: luuna/erpnext-worker:test-20221027-150342
+    
+
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: erpnext-autoscaler
+      namespace: erpnext
+    spec:
+      minReplicas: 8
+      maxReplicas: 20
+      metrics:
+        - type: External
+          external:
+            metric:
+              name: http_requests_erpnext-test
+              selector: 
+            target:
+              type: Value
+              value: 50000m 
+        - type: Resource
+          resource:
+            name: memory
+            target:
+              type: Utilization
+              averageUtilization: 70
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 10
+
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: erpnext-worker-s-autoscaler
+      namespace: erpnext
+    spec:
+      minReplicas: 5
+      maxReplicas: 15
+
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: erpnext-worker-d-autoscaler
+      namespace: erpnext
+    spec:
+      minReplicas: 5
+      maxReplicas: 15
+
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: erpnext-worker-l-autoscaler
+      namespace: erpnext
+    spec:
+      minReplicas: 5
+      maxReplicas: 15
+
+
+patches:
+  - patch: |
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: backup-and-push-job
+        namespace: erpnext
+      $patch: delete

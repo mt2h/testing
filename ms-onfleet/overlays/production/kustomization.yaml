@@ -1,0 +1,37 @@
+namespace: shipping
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ms-onfleet
+      namespace: shipping
+    spec:
+      template:
+        spec:
+          initContainers:
+          - name: migrations
+            image: luuna/ms-onfleet:master-b6adb0dda95a28f7f6c70a3a4f39ca9d01b78e45
+          containers:
+          - name: ms-onfleet
+            image: luuna/ms-onfleet:master-b6adb0dda95a28f7f6c70a3a4f39ca9d01b78e45
+
+  - |-
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: ms-onfleet
+      namespace: shipping
+    data:
+      FLASK_APP: "src/__init__.py"
+      FLASK_ENV: "production"
+      ON_FLEET_URL: "https://onfleet.com/api/v2/"
+      ZECORE_SHIPPING_URL: "https://zecore.com/api/v2/"  

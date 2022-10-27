@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: kong
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    konghq.com/plugins: prometheus
+  name: zefin-loan-gateway
+  namespace: zefin
+spec:
+  tls:
+  - secretName: zefin-loan-gateway-tls
+    hosts:
+    - zefin-dev.zebrands.mx
+  rules:
+    - host: zefin-dev.zebrands.mx
+      http:
+        paths:        
+        - path: /loan-gateway/v1
+          pathType: Prefix
+          backend:
+            service:
+              name: zefin-loan-gateway
+              port:
+                number: 80

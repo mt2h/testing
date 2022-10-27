@@ -1,0 +1,33 @@
+namespace: zefin
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: zefin-middleware-kyc
+      namespace: zefin
+    spec:
+      template:
+        spec:
+          containers:
+          - name: zefin-middleware-kyc
+            image: luuna/zefin-middleware-kyc:develop-67c9efbfe4224b4617a57d388c3f540776256e4b
+
+  - |-
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: zefin-middleware-kyc
+      namespace: zefin
+    data:
+      FLASK_APP: "app:create_app()"
+      FLASK_ENV: "development"
+      LOAN_APPLICATION_SERVICE_URL: "http://zefin-loan-origination-system"

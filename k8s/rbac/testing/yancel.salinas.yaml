@@ -1,0 +1,37 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: yancel.salinas
+  namespace: client
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/exec
+  - pods/portforward
+  - pods/log
+  - configmaps
+  #- secrets
+  - services
+  - services/portforward
+  - services/log
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: yancel.salinas
+  namespace: client
+subjects:
+- kind: User
+  name: yancel.salinas
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: yancel.salinas
+  apiGroup: rbac.authorization.k8s.io

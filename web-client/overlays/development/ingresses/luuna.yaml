@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: web-client-luuna
+  namespace: web-client
+spec:
+  rules:
+    - host: development.luuna.mx
+      http:
+        paths:
+          - backend:
+              service:
+                name: web-client-luuna
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific
+
+#---
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  annotations:
+#    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+#  name: link-interable-luuna
+#  namespace: web-client
+#spec:
+#  rules:
+#    - host: links-backend.luuna.mx
+#      http:
+#        paths:
+#          - backend:
+#              service:
+#                name: link-iterable-luuna
+#                port:
+#                  number: 443
+#            path: /
+#            pathType: ImplementationSpecific

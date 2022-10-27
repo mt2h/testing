@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ms-reviews
+  name: ms-reviews
+  namespace: client-ms-reviews
+  annotations:
+    secret.reloader.stakater.com/reload: "ms-reviews"
+spec:
+  selector:
+    matchLabels:
+      app: ms-reviews
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ms-reviews
+    spec:
+      containers:
+        - name: ms-reviews
+          image: luuna/ms-reviews:latest-develop
+          imagePullPolicy: Always
+          envFrom:     
+            - secretRef:
+                name: ms-reviews
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+              scheme: HTTP
+            failureThreshold: 5
+            successThreshold: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+          resources:
+           requests:
+             memory: "200Mi"
+             cpu: "150m"
+           limits:
+             memory: "350Mi"
+             cpu: "250m"
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsGroup: 10000
+            runAsUser: 10000
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: backend
+      restartPolicy: Always
+      serviceAccount: ms-reviews
+      serviceAccountName: ms-reviews

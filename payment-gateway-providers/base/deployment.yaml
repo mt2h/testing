@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: payment-gateway-providers
+  name: payment-gateway-providers
+  annotations:
+    configmap.reloader.stakater.com/reload: "payment-gateway-providers"
+    secret.reloader.stakater.com/reload: "payment-gateway-providers" 
+  namespace: payments
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-gateway-providers
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:   
+      labels:
+        app: payment-gateway-providers
+    spec:
+      securityContext:
+        supplementalGroups:
+        - 1000
+      initContainers:
+        - name: migrations
+          image: luuna/payment-gateway-providers:latest
+          imagePullPolicy: Always        
+          envFrom:
+          - configMapRef:
+              name: payment-gateway-providers        
+          - secretRef:
+              name: payment-gateway-providers
+          args:
+            - -c
+            - alembic upgrade head
+          command:
+            - /bin/sh 
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "150m"
+            limits:
+              memory: "500Mi"
+              cpu: "250m"
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsGroup: 10000
+            runAsUser: 10000                      
+      containers:
+        - name: payment-gateway-providers
+          image: luuna/payment-gateway-providers:latest
+          imagePullPolicy: Always
+          envFrom:
+          - configMapRef:
+              name: payment-gateway-providers         
+          - secretRef:
+              name: payment-gateway-providers
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: 8000
+              scheme: HTTP
+            failureThreshold: 5
+            successThreshold: 1
+            periodSeconds: 10
+            timeoutSeconds: 7              
+          resources:
+           requests:
+             memory: "250Mi"
+             cpu: "250m"
+           limits:
+             memory: "500Mi"
+             cpu: "1000m"
+          volumeMounts:
+            - mountPath: /tmp
+              name: app          
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+              - CAP_CHOWN
+            runAsUser: 0
+            #readOnlyRootFilesystem: true
+            #runAsGroup: 10000
+            #runAsUser: 10000
+      volumes:
+      - name: app
+        emptyDir: {}            
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: backend
+      restartPolicy: Always
+      serviceAccount: payment-gateway-providers
+      serviceAccountName: payment-gateway-providers

@@ -1,0 +1,11 @@
+resources:
+  - client
+  - monitoring
+  - payments
+  - shipping
+  - wordpress-cuidando-suenos
+  - wordpress-luuna-sleep
+  - wordpress-rem-luuna
+  - wordpress-traveler-mappa
+  - wordpress-zebrands
+  - zeus

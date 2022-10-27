@@ -1,0 +1,50 @@
+apiVersion: v1
+data:
+  mapAccounts: |
+    []
+  mapRoles: |
+    - "groups":
+      - "system:bootstrappers"
+      - "system:nodes"
+      "rolearn": "arn:aws:iam::027984065276:role/zeb-erpnext-staging20211122183930895200000009"
+      "username": "system:node:{{EC2PrivateDNSName}}"
+  mapUsers: |
+    - "groups":
+      - "system:masters"
+      "userarn": "arn:aws:iam::027984065276:user/mauricio"
+      "username": "mauricio"
+    - "groups":
+      - "system:masters"
+      "userarn": "arn:aws:iam::027984065276:user/carlos.rios@zeb.mx"
+      "username": "carlos.rios"
+    - "groups":
+      - "system:masters"
+      "userarn": "arn:aws:iam::027984065276:user/cristhian.monasterios@zeb.mx"
+      "username": "cristhian.monasterios"
+    - "groups":
+      - "system:masters"
+      "userarn": "arn:aws:iam::027984065276:user/yancel.salinas@zeb.mx"
+      "username": "yancel.salinas"
+    - "groups":
+      - "system:masters"
+      "userarn": "arn:aws:iam::027984065276:user/pablo.exeni@zeb.mx"
+      "username": "pablo.exeni"
+    - "groups":
+      - "system:masters"
+      "userarn": "arn:aws:iam::027984065276:user/sergio.reyes@zeb.mx"
+      "username": "sergio.reyes"
+    - "groups":
+      - "system:none"
+      "userarn": "arn:aws:iam::027984065276:user/nahuel.operto@zeb.mx"
+      "username": "nahuel.operto"
+    - "groups":
+      - "system:masters"
+      "userarn": "arn:aws:iam::027984065276:user/maximiliano.salamone@zeb.mx"
+      "username": "maximiliano.salamone"
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: Terraform
+    terraform.io/module: terraform-aws-modules.eks.aws
+  name: aws-auth
+  namespace: kube-system

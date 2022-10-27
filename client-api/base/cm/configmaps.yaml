@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: client-api
+  namespace: client-api
+data:
+  WSGI_APPLICATION: config.wsgi.application
+  LANGUAGE_CODE: es-mx
+  TIME_ZONE: America/Mexico_City

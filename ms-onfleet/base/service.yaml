@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ms-onfleet
+    service: ms-onfleet
+  name: ms-onfleet
+  namespace: shipping
+spec:
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+  selector:
+    app: ms-onfleet
+  type: ClusterIP

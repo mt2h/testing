@@ -1,0 +1,32 @@
+namespace: zefin
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: zefin-middleware-kyc
+      namespace: zefin
+    spec:
+      template:
+        spec:
+          containers:
+          - name: zefin-middleware-kyc
+            image: luuna/zefin-middleware-kyc:staging-ae8621ecfe362d05077cfc96d57187ba0d77490a
+
+  - |-
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: zefin-middleware-kyc
+      namespace: zefin
+    data:
+      FLASK_APP: "app:create_app()"
+      FLASK_ENV: "staging"

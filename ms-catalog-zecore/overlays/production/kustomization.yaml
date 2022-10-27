@@ -1,0 +1,85 @@
+resources:
+  - ../../base
+  #- ingress.yaml
+
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+configMapGenerator:
+- name: ms-catalog-zecore
+  literals:
+  - NODE_ENV=production
+  - PORT="3000"
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ms-catalog-zecore
+      namespace: client
+    spec:
+      template:
+        spec:
+          containers:
+            - name: ms-catalog-zecore
+              image: luuna/ms-catalog-zecore:zecore-production-1e63d4a0a23d426fa4b1692cffb0c8e254a9b28f
+              envFrom:
+                - configMapRef:
+                    name: ms-catalog-zecore
+                - secretRef:
+                    name: ms-catalog-zecore
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ms-catalog-zecore-celery
+      namespace: client
+    spec:
+      template:
+        spec:
+          containers:
+            - name: celery-worker
+              image: luuna/ms-catalog-zecore:zecore-production-1e63d4a0a23d426fa4b1692cffb0c8e254a9b28f
+              imagePullPolicy: Always
+              envFrom:
+              - secretRef:
+                  name: ms-catalog-zecore
+
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: ms-catalog-zecore
+      namespace: client
+    spec:
+      minReplicas: 2
+      maxReplicas: 10
+
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: ms-catalog-zecore-celery
+      namespace: client
+    spec:
+      minReplicas: 2
+      maxReplicas: 10
+
+  - |-
+    apiVersion: batch/v1beta1
+    kind: CronJob
+    metadata:
+      name: cronjob-reviews
+      namespace: client
+    spec:
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              containers:
+                - name: cronjob
+                  image: luuna/ms-catalog-zecore:zecore-production-1e63d4a0a23d426fa4b1692cffb0c8e254a9b28f

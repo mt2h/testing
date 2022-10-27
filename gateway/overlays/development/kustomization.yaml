@@ -1,0 +1,45 @@
+resources:
+  - ../../base
+  - ingress.yaml
+
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+configMapGenerator:
+  - name: gateway
+    literals:
+      - APP_PORT="5000"
+      - PLAYGROUND="true"
+      - MS_AUTH=http://ms-auth.client.svc.cluster.local/graphql
+      - MS_BRANDS=http://ms-brands.client.svc.cluster.local/graphql
+      - MS_CATALOG=http://ms-catalog.client.svc.cluster.local/graphql
+      - MS_REVIEWS=http://ms-reviews.client.svc.cluster.local/graphql
+      - REWARDS_URL=https://rewards-development.luuna.mx
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: gateway
+      namespace: client-gateway
+    spec:
+      template:
+        metadata:
+          annotations:
+            kubectl.kubernetes.io/restartedAt: "2022-01-29T18:38:08Z"
+        spec:
+          containers:
+          - name: gateway
+            image: luuna/gateway:develop-5de63310d993179c4bc1ede3b8012d7e61819114
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: gateway
+      namespace: client-gateway
+    spec:
+      minReplicas: 1
+      maxReplicas: 1

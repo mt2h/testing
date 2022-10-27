@@ -1,0 +1,50 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cronjob-reviews
+  namespace: client
+spec:
+  schedule: 0 6 * * *
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            cron: ms-catalog-zecore
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: cronjob
+              image: luuna/ms-catalog-zecore:latest
+              envFrom:
+              - secretRef:
+                  name: ms-catalog-zecore
+              command:
+                - "/bin/sh"
+              args:
+                - "-c"
+                - "yarn syncReviews && yarn reviewScores"
+              volumeMounts:
+                - mountPath: /tmp
+                  name: cache
+                  readOnly: false
+                - mountPath: /.cache
+                  name: cache
+                  readOnly: false
+                - mountPath: /.yarn
+                  name: cache
+                  readOnly: false
+          enableServiceLinks: true
+          imagePullSecrets:
+            - name: regcred
+          nodeSelector:
+            purpose: backend
+          volumes:
+            - emptyDir: {}
+              name: cache
+          serviceAccount: ms-catalog-zecore
+          serviceAccountName: ms-catalog-zecore
+                  

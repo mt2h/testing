@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: gateway-zecore
+  namespace: client-gateway
+spec:
+  rules:
+    - host: zecore-gateway.zebrands.mx
+      http:
+        paths:
+          - backend:
+              service:
+                name: gateway-zecore
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific

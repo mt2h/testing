@@ -1,0 +1,8 @@
+resources:
+  - zeus
+  - client
+  - monitoring
+  - payments
+  - privatebin
+  - shipping
+  - testing

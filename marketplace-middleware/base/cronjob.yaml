@@ -1,0 +1,37 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: marketplace-middleware
+  namespace: marketplace-middleware
+spec:
+  schedule: 0 13 * * *
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            cron: marketplace-middleware
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: marketplace-middleware-job
+              image: luuna/marketplace-middleware:latest-develop
+              command:
+                - "/bin/sh"
+              args:
+                - "-c"
+                - "npm run-script executeSamsDsv"
+              imagePullPolicy: Always
+              envFrom:
+                - secretRef:
+                    name: marketplace-middleware
+          enableServiceLinks: true
+          imagePullSecrets:
+            - name: regcred
+          nodeSelector:
+            purpose: backend
+          serviceAccount: marketplace-middleware
+          serviceAccountName: marketplace-middleware

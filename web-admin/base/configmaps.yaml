@@ -1,0 +1,54 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-admin
+  namespace: web-admin
+data:
+  WSGI_APPLICATION: config.wsgi.application
+  LANGUAGE_CODE: es-mx
+  TIME_ZONE: America/Mexico_City
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-web-admin
+  namespace: web-admin
+data:
+  nginx.conf: |
+    upstream web {  
+      ip_hash;
+      server localhost:8002;
+    }
+
+    server {
+        listen 80;
+        server_name _;
+
+        access_log /logs/nginx.access.logs;
+        error_log /logs/nginx.error.logs;
+
+        location /static/ {
+            autoindex on;
+            alias /static/;
+        }
+
+        location /_health {
+            return 200 'alive';
+            add_header Content-Type text/plain;
+        }
+
+        location / {
+            proxy_pass http://web/;
+            uwsgi_read_timeout 600;
+            proxy_connect_timeout   600;
+            proxy_send_timeout      600;
+            proxy_read_timeout      600;
+            proxy_buffer_size 256k;
+            proxy_buffers 4 256k;
+            client_max_body_size 60M;
+        }
+
+        client_header_buffer_size 256k;
+        large_client_header_buffers 4 256k;
+    }

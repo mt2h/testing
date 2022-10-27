@@ -1,0 +1,7 @@
+resources:
+  - deployments
+  - hpa
+  - service-account.yaml
+  - network-policies
+  - services
+  - cronjob.yaml

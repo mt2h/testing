@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: client-api-pos-nooz
+    service: client-api-pos-nooz
+  name: client-api-pos-nooz
+  namespace: client-api
+spec:
+  ports:
+    - port: 80
+      targetPort: 8001
+      protocol: TCP
+  selector:
+    app: client-api-pos-nooz
+  type: ClusterIP

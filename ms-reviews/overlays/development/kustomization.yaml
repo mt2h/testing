@@ -1,0 +1,32 @@
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ms-reviews
+      namespace: client-ms-reviews
+    spec:
+      template:
+        spec:
+          containers:
+          - name: ms-reviews
+            image: luuna/ms-reviews:develop-3d5d06c00c295a75b30333e509fd6c9287056331
+  
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: ms-reviews
+      namespace: client-ms-reviews
+    spec:
+      minReplicas: 1
+      maxReplicas: 5

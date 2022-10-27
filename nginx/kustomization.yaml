@@ -1,0 +1,23 @@
+generators:
+  - secret-generator.yaml
+
+namespace: payments
+
+resources:
+  - ingress/nginx-letsencrypt.yaml
+  - ingress/nginx-acm.yaml
+  #- letsencrypt-staging.yaml
+
+helmCharts:
+- name: nginx
+  repo: https://charts.bitnami.com/bitnami
+  # version: 10.1.0
+  releaseName: nginx
+  valuesFile:  values.yaml
+  namespace: test
+- name: cert-manager
+  repo: https://charts.jetstack.io
+  version: v1.8.0
+  releaseName: cert-manager
+  valuesFile:  cert-manager.values.yaml
+  namespace: test

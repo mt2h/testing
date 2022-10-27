@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: erpnext-redis-queue
+  namespace: erpnext
+spec:
+  type: ClusterIP
+  ports:
+    - port: 12000
+      targetPort: 6379
+  selector:
+    app.kubernetes.io/name: erpnext-redis-queue
+    app.kubernetes.io/instance: erpnext-redis-queue

@@ -1,0 +1,12 @@
+generators:
+  - secret-generator.yaml
+
+namespace: client
+
+helmCharts:
+- name: mongodb
+  repo: https://charts.bitnami.com/bitnami
+  version: 10.30.12
+  releaseName: mongodb
+  valuesFile:  values.yaml
+  namespace: client

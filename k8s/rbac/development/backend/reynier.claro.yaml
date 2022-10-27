@@ -1,0 +1,42 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: reynier.claro
+  namespace: payments
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/log
+  - configmaps
+  - secrets
+  - services
+  - services/log
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  - pods/portforward
+  - services/portforward
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: reynier.claro
+  namespace: payments
+subjects:
+- kind: User
+  name: reynier.claro
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: reynier.claro
+  apiGroup: rbac.authorization.k8s.io

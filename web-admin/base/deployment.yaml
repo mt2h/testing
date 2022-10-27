@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: web-admin
+  name: web-admin
+  namespace: web-admin
+spec:
+  selector:
+    matchLabels:
+      app: web-admin
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: web-admin
+    spec:
+      containers:
+        - name: web-admin
+          image: luuna/web-admin:latest-staging
+          imagePullPolicy: Always
+          envFrom:
+          - configMapRef:
+              name: web-admin         
+          - secretRef:
+              name: web-admin
+          startupProbe:
+            httpGet:
+              path: /_health
+              port: 8002
+              scheme: HTTP
+            failureThreshold: 60
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /_health
+              port: 8002
+              scheme: HTTP
+            failureThreshold: 5
+            successThreshold: 1
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8002
+              scheme: HTTP
+            failureThreshold: 5
+            successThreshold: 1
+            periodSeconds: 30
+            timeoutSeconds: 15
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "50m"
+            limits:
+              memory: "1.5Gi"
+              cpu: "100m"
+          volumeMounts:
+            - mountPath: /code/logs
+              name: logs
+            - mountPath: /code/web/static
+              name: static
+        - name: nginx-web-admin
+          image: nginx:1.21.4
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: nginx-web-admin
+              mountPath: /etc/nginx/conf.d/default.conf 
+              subPath: nginx.conf
+            - mountPath: /static
+              name: static
+            - mountPath: /logs
+              name: logs
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: 80
+              scheme: HTTP
+            failureThreshold: 5
+            successThreshold: 1
+            periodSeconds: 10
+            timeoutSeconds: 10
+          resources:
+            requests:
+              memory: "500Mi"
+              cpu: "50m"
+            limits:
+              memory: "1Gi"
+              cpu: "100m"
+      enableServiceLinks: true
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        purpose: frontend
+      volumes:
+        - emptyDir: {}
+          name: logs
+        - emptyDir: {}
+          name: static
+        - name: nginx-web-admin
+          configMap:
+            name: nginx-web-admin
+      restartPolicy: Always
+      serviceAccount: web-admin
+      serviceAccountName: web-admin

@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      location /metrics {
+        allow 10.1.0.0/16;
+        allow 10.2.0.0/16;
+        deny all;
+      }
+  name: erpnext
+  namespace: erpnext
+spec:
+  rules:
+  - host: erp-staging.zebrands.mx
+    http:
+      paths:
+      - backend:
+          service:
+            name: erpnext
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific

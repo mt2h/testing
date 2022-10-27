@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: zefin-loan-gateway
+    service: zefin-loan-gateway
+  name: zefin-loan-gateway
+  namespace: zefin
+spec:
+  ports:
+    - port: 80
+      targetPort: 5000
+      protocol: TCP
+  selector:
+    app: zefin-loan-gateway
+  type: ClusterIP

@@ -1,0 +1,8 @@
+resources:
+  - ../../base/cm/
+  - ../../base/sa/
+  - web/
+  - pos/
+  - b2b/
+
+namespace: client

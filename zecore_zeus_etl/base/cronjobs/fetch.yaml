@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: fetch-liverpool
+  namespace: zeus
+spec:
+  schedule: 0 9 * * *
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 60
+      backoffLimit: 1
+      template:
+        spec:
+          automountServiceAccountToken: true
+          containers:
+          - name: manage
+            image: luuna/zecore_zeus_etl:latest
+            imagePullPolicy: Always
+            envFrom:
+              - secretRef:
+                  name: fetch
+            command:
+              - /bin/sh 
+            args:
+              - -c
+              - python manage.py fetch_liverpool
+            resources:
+              requests:
+                memory: "1Gi"
+                cpu: "500m"
+              limits:
+                memory: "3Gi"
+                cpu: "1500m"
+          enableServiceLinks: true
+          imagePullSecrets:
+            - name: regcred
+          securityContext:
+            runAsGroup: 10000
+            runAsUser: 10000
+          nodeSelector:
+            purpose: backend
+          restartPolicy: Never
+          serviceAccount: zecore-zeus-etl
+          serviceAccountName: zecore-zeus-etl
+  successfulJobsHistoryLimit: 3
+  suspend: false

@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: web-admin
+  namespace: web-admin
+spec:
+  rules:
+    - host: admin-development.luuna.mx
+      http:
+        paths:
+          - backend:
+              service:
+                name: web-admin
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific

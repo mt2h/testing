@@ -1,0 +1,43 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: marketplace-middleware-cli
+  namespace: marketplace-middleware-cli
+spec:
+  schedule: 0 13 * * *
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            cron: marketplace-middleware-cli
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: marketplace-middleware-cli-job
+              image: luuna/marketplace-middleware-cli:latest-develop
+              command:
+                - "/bin/sh"
+              args:
+                - "-c"
+                - "python main.py search-missed-orders -d 1 -s"
+              volumeMounts:
+                - mountPath: /app-run/reports
+                  name: reports
+              imagePullPolicy: Always
+              envFrom:
+                - secretRef:
+                    name: marketplace-middleware-cli
+          enableServiceLinks: true
+          imagePullSecrets:
+            - name: regcred
+          nodeSelector:
+            purpose: backend
+          volumes:
+            - emptyDir: {}
+              name: reports
+          serviceAccount: marketplace-middleware-cli
+          serviceAccountName: marketplace-middleware-cli

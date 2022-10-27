@@ -1,0 +1,4 @@
+generators:
+  - secret-generator.yaml
+
+namespace: wordpress-zebrands

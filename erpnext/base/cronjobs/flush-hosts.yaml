@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: flush-hosts-job
+  namespace: erpnext
+spec:
+  schedule: 0 */6 * * *
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 60
+      backoffLimit: 1
+      template:
+        spec:
+          automountServiceAccountToken: true
+          containers:
+          - args:
+            - -c
+            - mysqladmin -h $MARIADB_HOST -u $MARIADB_USER --password=$MARIADB_PASSWORD
+              flush-hosts
+            command:
+            - /bin/sh
+            envFrom:
+            - secretRef:
+                name: mariadb
+            image: luuna/erpnext-worker:master-latest
+            imagePullPolicy: Always
+            name: push-backup
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          enableServiceLinks: true
+          imagePullSecrets:
+          - name: docker-creds
+          restartPolicy: Never
+          schedulerName: default-scheduler
+          securityContext:
+            runAsNonRoot: false
+            supplementalGroups:
+            - 1000
+          shareProcessNamespace: false
+          terminationGracePeriodSeconds: 30
+  successfulJobsHistoryLimit: 3
+  suspend: false

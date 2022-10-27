@@ -1,0 +1,31 @@
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ms-auth
+      namespace: client-ms-auth
+    spec:
+      template:
+        spec:
+          containers:
+          - name: ms-auth
+            image: luuna/ms-auth:master-211af484963a36a33bc4335e22127dcabac542b9
+  - |-
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: ms-auth
+      namespace: client-ms-auth
+    spec:
+      minReplicas: 2
+      maxReplicas: 20

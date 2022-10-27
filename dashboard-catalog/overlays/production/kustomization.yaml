@@ -1,0 +1,25 @@
+namespace: client
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: dashboard-catalog
+      namespace: client-dashboard-catalog
+    spec:
+      template:
+        spec:
+          containers:
+            - name: dashboard-catalog
+              image: luuna/dashboard-catalog:dashboard-production-9cfc25510dd9424222387ace4056acbb45a2ee02
+          initContainers:
+            - name: init-migrate
+              image: luuna/dashboard-catalog:dashboard-production-9cfc25510dd9424222387ace4056acbb45a2ee02

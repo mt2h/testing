@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: backup-and-push-job
+  namespace: erpnext
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  ttlSecondsAfterFinished: 60
+  backoffLimit: 2
+  template:
+    spec:
+      automountServiceAccountToken: true
+      containers:
+      - name: push-backup
+        image: luuna/erpnext-worker:master-latest
+        imagePullPolicy: Always
+        envFrom:
+        - secretRef:
+            name: s3
+        - configMapRef:
+            name: erpnext
+        args:
+        - push-backup
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /home/frappe/frappe-bench/sites
+          mountPropagation: None
+          name: sites-dir
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      imagePullSecrets:
+      - name: docker-creds
+      initContainers:
+      - name: backup
+        image: luuna/erpnext-worker:master-latest
+        imagePullPolicy: Always
+        args:
+        - backup
+        env:
+        - name: WITH_FILES
+          value: "1"
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /home/frappe/frappe-bench/sites
+          mountPropagation: None
+          name: sites-dir
+      restartPolicy: Never
+      schedulerName: default-scheduler
+      securityContext:
+        runAsNonRoot: false
+        supplementalGroups:
+        - 1000
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: sites-dir
+        persistentVolumeClaim:
+          claimName: erpnext

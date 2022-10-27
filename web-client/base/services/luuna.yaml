@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: web-client-luuna
+    service: web-client-luuna
+  name: web-client-luuna
+  namespace: web-client
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8000
+  selector:
+    app: web-client-luuna
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: link-iterable-luuna
+  namespace: web-client
+spec:
+  ports:
+    - port: 43
+  type: ExternalName
+  externalName: links.iterable.com

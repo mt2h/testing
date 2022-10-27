@@ -1,0 +1,3 @@
+resources:
+  - serviceaccount-erpnext.yaml
+  - serviceaccount-redis.yaml

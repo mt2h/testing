@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: zefin-loan-gateway
+  namespace: zefin
+spec:
+  podSelector:
+    matchLabels:
+      app: zefin-loan-gateway
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: zefin-loan-gateway
+      ports:
+        - protocol: TCP
+          port: 5000
+  egress:
+    - ports:
+        - protocol: TCP
+          port: 5671
+        - protocol: TCP
+          port: 5672
+        - protocol: TCP
+          port: 15964

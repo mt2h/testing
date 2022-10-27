@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ms-catalog
+  namespace: client-ms-catalog
+spec:
+  podSelector:
+    matchLabels:
+      app: ms-catalog
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ms-catalog
+      ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    - ports:
+        - protocol: TCP
+          port: 3306
+        - protocol: TCP
+          port: 16548
+        - protocol: TCP
+          port: 80

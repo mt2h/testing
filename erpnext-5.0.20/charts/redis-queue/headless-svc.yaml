@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: erpnext-redis-queue-headless
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: redis-queue
+    helm.sh/chart: redis-queue-16.4.0
+    app.kubernetes.io/instance: erpnext
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: tcp-redis
+      port: 6379
+      targetPort: redis
+  selector:
+    app.kubernetes.io/name: redis-queue
+    app.kubernetes.io/instance: erpnext

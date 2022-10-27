@@ -1,0 +1,14 @@
+resources:
+  - deployment-gunicorn.yaml
+  - deployment-nginx.yaml
+  - deployment-scheduler.yaml
+  - deployment-socketio.yaml
+  - deployment-worker-default.yaml
+  - deployment-worker-long.yaml
+  - deployment-worker-short.yaml
+  #- job-configure-bench.yaml
+  - pvc.yaml
+  - service-gunicorn.yaml
+  - service-nginx.yaml
+  - service-socketio.yaml
+  - serviceaccount.yaml

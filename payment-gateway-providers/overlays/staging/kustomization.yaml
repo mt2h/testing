@@ -1,0 +1,34 @@
+namespace: payments
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: payment-gateway-providers
+      namespace: payments
+    spec:
+      template:
+        spec:
+          initContainers:
+          - name: migrations
+            image: luuna/payment-gateway-providers:staging-1af6bfda204ede9dbc2fe1c6649c1c8e3419e067
+          containers:
+          - name: payment-gateway-providers
+            image: luuna/payment-gateway-providers:staging-1af6bfda204ede9dbc2fe1c6649c1c8e3419e067
+
+patches:
+  - patch: |
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: svc-vpn-site-to-site
+        namespace: payments
+      $patch: delete

@@ -1,0 +1,24 @@
+namespace: payments
+
+generators:
+  - secret-generator.yaml
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: zecore-async-entrypoint
+      namespace: payments
+    spec:
+      template:
+        spec:
+          containers:
+          - name: zecore-async-entrypoint
+            image: luuna/zecore-async-entrypoint:master-0bd37998f98242815a9efca6b5fa0d234cb29eec
+          - name: zecore-async-entrypoint-api
+            image: luuna/zecore-async-entrypoint:master-0bd37998f98242815a9efca6b5fa0d234cb29eec

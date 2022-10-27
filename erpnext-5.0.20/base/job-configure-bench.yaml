@@ -1,0 +1,78 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: erpnext-conf-bench-20220927132621
+  labels:
+    helm.sh/chart: erpnext-5.0.20
+    app.kubernetes.io/name: erpnext
+    app.kubernetes.io/instance: erpnext
+    app.kubernetes.io/version: "v14.2.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      serviceAccountName: erpnext
+      initContainers:
+      - name: frappe-bench-ownership
+        image: frappe/erpnext-worker:v14.2.0
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c']
+        args:
+          - chown -R "1000:1000" /home/frappe/frappe-bench
+        resources:
+          {}
+        securityContext:
+          # run as root to set ownership
+          runAsUser: 0
+        volumeMounts:
+          - name: sites-dir
+            mountPath: /home/frappe/frappe-bench/sites
+          - name: logs
+            mountPath: /home/frappe/frappe-bench/logs
+      securityContext:
+        supplementalGroups:
+        - 1000
+      containers:
+      - name: configure
+        image: "frappe/erpnext-worker:v14.2.0"
+        imagePullPolicy: IfNotPresent
+        command: ['bash', '-c']
+        args:
+          - >
+            ls -1 ../apps > apps.txt;
+            [[ -f common_site_config.json ]] || echo "{}" > common_site_config.json;
+            bench set-config -gp db_port $DB_PORT;
+            bench set-config -g db_host $DB_HOST;
+            bench set-config -g redis_cache $REDIS_CACHE;
+            bench set-config -g redis_queue $REDIS_QUEUE;
+            bench set-config -g redis_socketio $REDIS_SOCKETIO;
+            bench set-config -gp socketio_port $SOCKETIO_PORT;
+        env:
+          - name: DB_HOST
+            value: erpnext-mariadb
+          - name: DB_PORT
+            value: "3306"
+          - name: REDIS_CACHE
+            value: redis://erpnext-redis-cache-master:6379
+          - name: REDIS_QUEUE
+            value: redis://erpnext-redis-queue-master:6379
+          - name: REDIS_SOCKETIO
+            value: redis://erpnext-redis-socketio-master:6379
+          - name: SOCKETIO_PORT
+            value: "9000"
+        resources:
+          {}
+        volumeMounts:
+          - name: sites-dir
+            mountPath: /home/frappe/frappe-bench/sites
+          - name: logs
+            mountPath: /home/frappe/frappe-bench/logs
+      restartPolicy: Never
+      volumes:
+        - name: sites-dir
+          persistentVolumeClaim:
+            claimName: erpnext
+            readOnly: false
+        - name: logs
+          emptyDir: {}

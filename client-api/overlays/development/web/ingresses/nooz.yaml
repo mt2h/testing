@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: client-api-nooz
+  namespace: client-api
+spec:
+  rules:
+    - host: api-development.nooz.mx
+      http:
+        paths:
+          - backend:
+              service:
+                name: client-api-nooz
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific
